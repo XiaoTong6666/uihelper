@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.navigationevent.compose)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.miuix)
+    implementation(libs.miuix.preference)
     implementation(libs.miuix.navigation3.ui)
 
     debugImplementation(libs.androidx.compose.ui.tooling)

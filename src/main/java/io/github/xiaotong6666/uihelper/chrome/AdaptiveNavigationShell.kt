@@ -54,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 import io.github.xiaotong6666.uihelper.material.scaffold.ExpressiveScaffold
 import io.github.xiaotong6666.uihelper.material.scaffold.expressiveTopAppBarColors
 import io.github.xiaotong6666.uihelper.material.scaffold.materialScaffoldEdgeToEdgeInsets
@@ -270,6 +271,7 @@ fun AdaptiveNavigationShell(
 
         UiMode.Material -> {
             val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+            val surfaces = materialSurfaceLadder()
             val pageHostHandle = remember(scrollBehavior) {
                 PageHostHandle(
                     nestedScrollConnection = scrollBehavior.nestedScrollConnection,
@@ -304,7 +306,7 @@ fun AdaptiveNavigationShell(
                 } else {
                     {
                         ShortNavigationBar(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            containerColor = surfaces.page,
                             windowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout).only(
                                 WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
                             ),

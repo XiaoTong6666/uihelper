@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 import kotlin.math.roundToInt
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
@@ -65,8 +67,8 @@ annotation class SegmentedColumnDsl
 
 @Composable
 private fun defaultSegmentedColors(): ListItemColors = ListItemDefaults.segmentedColors(
-    containerColor = colorScheme.surfaceBright,
-    disabledContainerColor = colorScheme.surfaceBright,
+    containerColor = materialSurfaceLadder().grouped,
+    disabledContainerColor = materialSurfaceLadder().grouped,
     supportingContentColor = colorScheme.onSurfaceVariant,
 )
 
@@ -257,12 +259,15 @@ fun SegmentedItem(
 @Composable
 fun SegmentedItemContainer(
     modifier: Modifier = Modifier,
+    containerColor: androidx.compose.ui.graphics.Color = materialSurfaceLadder().grouped,
+    contentColor: androidx.compose.ui.graphics.Color = contentColorFor(containerColor),
     content: @Composable () -> Unit,
 ) {
     val shapes = LocalListItemShapes.current ?: ListItemDefaults.segmentedShapes(0, 1)
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = colorScheme.surfaceBright,
+        color = containerColor,
+        contentColor = contentColor,
         shape = shapes.shape,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {

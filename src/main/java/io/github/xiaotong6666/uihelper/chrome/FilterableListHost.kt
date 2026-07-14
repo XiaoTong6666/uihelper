@@ -76,6 +76,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.material.materialChromeIconButtonColors
+import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 import io.github.xiaotong6666.uihelper.miuix.primitive.CollapsedSearchBox
 import io.github.xiaotong6666.uihelper.miuix.primitive.SearchBarFake
 import io.github.xiaotong6666.uihelper.miuix.primitive.SearchOverlayPager
@@ -154,6 +156,7 @@ private fun MaterialFilterableListHost(
     materialMainContent: @Composable (contentModifier: Modifier, searchBar: @Composable () -> Unit) -> Unit,
     materialSearchResultContent: @Composable (contentModifier: Modifier, closeSearch: () -> Unit) -> Unit,
 ) {
+    val surfaces = materialSurfaceLadder()
     val pullToRefreshState = rememberMaterialPullToRefreshState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -243,10 +246,7 @@ private fun MaterialFilterableListHost(
                         androidx.compose.material3.IconButton(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = { collapseAndClear() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHighest,
-                                contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
+                            colors = materialChromeIconButtonColors(),
                         ) {
                             Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
                         }
@@ -311,7 +311,7 @@ private fun MaterialFilterableListHost(
                         .padding(bottom = 18.dp),
                     state = searchBarState,
                     inputField = inputField,
-                    colors = SearchBarDefaults.colors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHighest),
+                    colors = SearchBarDefaults.colors(containerColor = surfaces.chrome),
                 )
             }
         }

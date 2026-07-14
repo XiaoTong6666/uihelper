@@ -18,6 +18,7 @@
 
 package io.github.xiaotong6666.uihelper.miuix.primitive
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,28 +29,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun SettingsGroupMiuix(content: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.defaultColors(
-            color = MiuixTheme.colorScheme.surfaceContainer.copy(alpha = 0.72f),
-            contentColor = MiuixTheme.colorScheme.onSurfaceContainerHigh,
-        ),
         insideMargin = PaddingValues(0.dp),
     ) {
         Column(modifier = Modifier.fillMaxWidth(), content = content)
@@ -62,41 +62,42 @@ fun SettingsGroupHeaderMiuix(text: String) {
 }
 
 @Composable
-fun SettingsToggleItemMiuix(checked: Boolean, title: String, description: String, onToggle: () -> Unit) {
-    SettingsItemSurfaceMiuix(onClick = onToggle) {
+fun SettingsToggleItemMiuix(checked: Boolean, title: String, description: String, icon: ImageVector? = null, onToggle: () -> Unit) {
+    SwitchPreference(
+        title = title,
+        summary = description,
+        startAction = {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 6.dp),
+                    tint = MiuixTheme.colorScheme.onBackground,
+                )
+            }
+        },
+        checked = checked,
+        onCheckedChange = { onToggle() },
+    )
+}
+
+@Composable
+fun SettingsInfoItemMiuix(title: String, value: String, icon: ImageVector? = null) {
+    SettingsItemSurfaceMiuix {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(text = title, style = MiuixTheme.textStyles.headline2, color = MiuixTheme.colorScheme.onSurface)
-                Text(text = description, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                )
             }
-            Switch(
-                checked = checked,
-                onCheckedChange = null,
-                modifier = Modifier.clearAndSetSemantics {},
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MiuixTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MiuixTheme.colorScheme.primary,
-                    checkedBorderColor = Color.Transparent,
-                    checkedIconColor = MiuixTheme.colorScheme.primary,
-                    uncheckedThumbColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    uncheckedTrackColor = MiuixTheme.colorScheme.surfaceContainerHighest,
-                    uncheckedBorderColor = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    uncheckedIconColor = MiuixTheme.colorScheme.surfaceContainerHighest,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
-fun SettingsInfoItemMiuix(title: String, value: String) {
-    SettingsItemSurfaceMiuix {
-        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
                 Text(text = title, style = MiuixTheme.textStyles.footnote2, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
                 Text(text = value, style = MiuixTheme.textStyles.body1, color = MiuixTheme.colorScheme.onSurface)
             }
@@ -105,8 +106,66 @@ fun SettingsInfoItemMiuix(title: String, value: String) {
 }
 
 @Composable
+fun SettingsNavigationItemMiuix(
+    title: String,
+    description: String,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+) {
+    ArrowPreference(
+        title = title,
+        summary = description,
+        startAction = {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 6.dp),
+                    tint = MiuixTheme.colorScheme.onBackground,
+                )
+            }
+        },
+        onClick = onClick,
+    )
+}
+
+@Composable
+fun SettingsDropdownItemMiuix(
+    title: String,
+    description: String,
+    items: List<String>,
+    selectedIndex: Int,
+    icon: ImageVector? = null,
+    onItemSelected: (Int) -> Unit,
+) {
+    OverlayDropdownPreference(
+        title = title,
+        summary = description,
+        items = items,
+        startAction = {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 6.dp),
+                    tint = MiuixTheme.colorScheme.onBackground,
+                )
+            }
+        },
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = onItemSelected,
+    )
+}
+
+@Composable
 fun SettingsGroupDividerMiuix() {
-    Spacer(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(1.dp))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(1.dp)
+            .background(MiuixTheme.colorScheme.outline.copy(alpha = 0.28f)),
+    )
 }
 
 @Composable

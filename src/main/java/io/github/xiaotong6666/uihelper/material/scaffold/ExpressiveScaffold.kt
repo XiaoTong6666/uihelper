@@ -29,6 +29,7 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 
 @Composable
 fun ExpressiveScaffold(
@@ -38,7 +39,7 @@ fun ExpressiveScaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    containerColor: Color = materialSurfaceLadder().page,
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = materialScaffoldEdgeToEdgeInsets(),
     content: @Composable (PaddingValues) -> Unit,
@@ -59,7 +60,7 @@ fun ExpressiveScaffold(
 
 @Composable
 fun expressiveTopAppBarColors(
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    containerColor: Color = materialSurfaceLadder().page,
     scrolledContainerColor: Color = containerColor,
 ): TopAppBarColors = TopAppBarDefaults.topAppBarColors(
     containerColor = containerColor,

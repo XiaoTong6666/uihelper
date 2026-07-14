@@ -21,6 +21,7 @@ package io.github.xiaotong6666.uihelper.adaptive
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import io.github.xiaotong6666.uihelper.material.primitive.ActionGridMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.AppTextFieldMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.ConfigTextFieldMaterial
@@ -37,10 +38,12 @@ import io.github.xiaotong6666.uihelper.material.primitive.RuntimeSummaryCardMate
 import io.github.xiaotong6666.uihelper.material.primitive.SectionCardMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SectionDescriptionMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SectionTitleMaterial
+import io.github.xiaotong6666.uihelper.material.primitive.SettingsDropdownItemMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SettingsGroupDividerMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SettingsGroupHeaderMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SettingsGroupMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SettingsInfoItemMaterial
+import io.github.xiaotong6666.uihelper.material.primitive.SettingsNavigationItemMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.SettingsToggleItemMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.StatusChipMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.WarningBannerMaterial
@@ -60,10 +63,12 @@ import io.github.xiaotong6666.uihelper.miuix.primitive.RuntimeSummaryCardMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SectionCardMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SectionDescriptionMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SectionTitleMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsDropdownItemMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsGroupDividerMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsGroupHeaderMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsGroupMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsInfoItemMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsNavigationItemMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsToggleItemMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.StatusChipMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.WarningBannerMiuix
@@ -194,11 +199,12 @@ fun SettingsToggleItem(
     checked: Boolean,
     title: String,
     description: String,
+    icon: ImageVector? = null,
     onToggle: () -> Unit,
 ) {
     when (LocalUiMode.current) {
-        UiMode.Miuix -> SettingsToggleItemMiuix(checked, title, description, onToggle)
-        UiMode.Material -> SettingsToggleItemMaterial(checked, title, description, onToggle)
+        UiMode.Miuix -> SettingsToggleItemMiuix(checked, title, description, icon, onToggle)
+        UiMode.Material -> SettingsToggleItemMaterial(checked, title, description, icon, onToggle)
     }
 }
 
@@ -206,10 +212,39 @@ fun SettingsToggleItem(
 fun SettingsInfoItem(
     title: String,
     value: String,
+    icon: ImageVector? = null,
 ) {
     when (LocalUiMode.current) {
-        UiMode.Miuix -> SettingsInfoItemMiuix(title, value)
-        UiMode.Material -> SettingsInfoItemMaterial(title, value)
+        UiMode.Miuix -> SettingsInfoItemMiuix(title, value, icon)
+        UiMode.Material -> SettingsInfoItemMaterial(title, value, icon)
+    }
+}
+
+@Composable
+fun SettingsNavigationItem(
+    title: String,
+    description: String,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> SettingsNavigationItemMiuix(title, description, icon, onClick)
+        UiMode.Material -> SettingsNavigationItemMaterial(title, description, icon, onClick)
+    }
+}
+
+@Composable
+fun SettingsDropdownItem(
+    title: String,
+    description: String,
+    items: List<String>,
+    selectedIndex: Int,
+    icon: ImageVector? = null,
+    onItemSelected: (Int) -> Unit,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> SettingsDropdownItemMiuix(title, description, items, selectedIndex, icon, onItemSelected)
+        UiMode.Material -> SettingsDropdownItemMaterial(title, description, items, selectedIndex, icon, onItemSelected)
     }
 }
 

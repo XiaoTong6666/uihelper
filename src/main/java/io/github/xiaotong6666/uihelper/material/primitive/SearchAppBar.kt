@@ -72,6 +72,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.material.materialChromeIconButtonColors
+import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 import io.github.xiaotong6666.uihelper.material.scaffold.expressiveTopAppBarColors
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -90,6 +92,7 @@ fun SearchAppBar(
     defaultContent: @Composable BoxScope.(bottomPadding: Dp, closeSearch: () -> Unit) -> Unit = { _, _ -> },
     searchContent: @Composable BoxScope.(bottomPadding: Dp, closeSearch: () -> Unit) -> Unit = { _, _ -> },
 ) {
+    val surfaces = materialSurfaceLadder()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val scaledDensity = LocalDensity.current
@@ -177,10 +180,7 @@ fun SearchAppBar(
                         IconButton(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = { collapseAndClear() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
+                            colors = materialChromeIconButtonColors(),
                         ) {
                             Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
                         }
@@ -201,7 +201,7 @@ fun SearchAppBar(
         }
     }
 
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
+    Surface(color = surfaces.page) {
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -222,7 +222,7 @@ fun SearchAppBar(
                     .padding(bottom = 13.dp),
                 state = searchBarState,
                 inputField = inputField,
-                colors = SearchBarDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                colors = SearchBarDefaults.colors(containerColor = surfaces.chrome),
             )
         }
     }

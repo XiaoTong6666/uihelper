@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 import io.github.xiaotong6666.uihelper.model.GridActionItem
 import io.github.xiaotong6666.uihelper.model.GridActionStyle
 import io.github.xiaotong6666.uihelper.model.SectionDescriptionStyle
@@ -97,7 +98,7 @@ fun SectionDescriptionMaterial(
 @Composable
 fun TonalCardMaterial(
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceBright,
+    containerColor: Color = materialSurfaceLadder().grouped,
     contentColor: Color = contentColorFor(containerColor),
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,

@@ -308,7 +308,7 @@ private fun MaterialFilterableListHost(
                     modifier = Modifier
                         .fillMaxWidth()
                         .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-                        .padding(bottom = 18.dp),
+                        .padding(bottom = 12.dp),
                     state = searchBarState,
                     inputField = inputField,
                     colors = SearchBarDefaults.colors(containerColor = surfaces.chrome),

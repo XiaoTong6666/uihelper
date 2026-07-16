@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.navigationevent.compose)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.commonmark)
     implementation(libs.miuix)
     implementation(libs.miuix.preference)
     implementation(libs.miuix.navigation3.ui)

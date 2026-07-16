@@ -18,8 +18,6 @@
 
 package io.github.xiaotong6666.uihelper.material.primitive
 
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,19 +26,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,20 +40,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
+import io.github.xiaotong6666.uihelper.popup.OffsetAnchoredPopupMenu
+import io.github.xiaotong6666.uihelper.popup.PopupMenuGroup
+import io.github.xiaotong6666.uihelper.popup.PopupMenuItem
+import io.github.xiaotong6666.uihelper.popup.trackPopupMenuPressPosition
 import kotlin.math.roundToInt
 
 @Composable
@@ -239,7 +230,7 @@ fun SettingsDropdownItemMaterial(
     } else {
         -1
     }
-    Box(modifier = Modifier.trackPressPosition { anchorOffset = IntOffset(it.x.roundToInt(), it.y.roundToInt()) }) {
+    Box(modifier = Modifier.trackPopupMenuPressPosition { anchorOffset = IntOffset(it.x.roundToInt(), it.y.roundToInt()) }) {
         SettingsItemSurfaceMaterial(onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
             expanded = true
@@ -288,31 +279,26 @@ fun SettingsDropdownItemMaterial(
                 )
             }
         }
-        OffsetAnchoredExpressiveMenu(
+        OffsetAnchoredPopupMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            anchorOffset = anchorOffset,
-        ) {
-            items.forEachIndexed { index, item ->
-                DropdownMenuItem(
-                    text = { Text(item) },
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                        expanded = false
-                        onItemSelected(index)
-                    },
-                    selected = index == safeIndex,
-                    shapes = MenuDefaults.itemShape(index = index, count = items.size),
-                    selectedLeadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(MenuDefaults.LeadingIconSize),
+            groups = listOf(
+                PopupMenuGroup(
+                    items = items.mapIndexed { index, item ->
+                        PopupMenuItem(
+                            label = item,
+                            selected = index == safeIndex,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                expanded = false
+                                onItemSelected(index)
+                            },
                         )
                     },
-                )
-            }
-        }
+                ),
+            ),
+            anchorOffset = anchorOffset,
+        )
     }
 }
 
@@ -337,40 +323,4 @@ private fun SettingsItemSurfaceMaterial(
         contentColor = MaterialTheme.colorScheme.onSurface,
         content = content,
     )
-}
-
-@Composable
-internal fun OffsetAnchoredExpressiveMenu(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    anchorOffset: IntOffset = IntOffset.Zero,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Box(
-        modifier = Modifier.layout { measurable, constraints ->
-            val placeable = measurable.measure(Constraints())
-            val width = if (constraints.hasBoundedWidth) constraints.maxWidth else 0
-            layout(width, 0) {
-                placeable.place(anchorOffset.x, anchorOffset.y)
-            }
-        },
-    ) {
-        DropdownMenuPopup(
-            expanded = expanded,
-            onDismissRequest = onDismissRequest,
-        ) {
-            DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(index = 0, count = 1),
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                content = content,
-            )
-        }
-    }
-}
-
-internal fun Modifier.trackPressPosition(onPress: (Offset) -> Unit): Modifier = pointerInput(Unit) {
-    awaitEachGesture {
-        val down = awaitFirstDown(requireUnconsumed = false)
-        onPress(down.position)
-    }
 }

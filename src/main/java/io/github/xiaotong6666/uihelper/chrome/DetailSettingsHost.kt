@@ -21,6 +21,7 @@ package io.github.xiaotong6666.uihelper.chrome
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,27 +31,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.material.materialAccentIconButtonColors
 import io.github.xiaotong6666.uihelper.material.materialChromeIconButtonColors
@@ -60,11 +53,11 @@ import io.github.xiaotong6666.uihelper.material.scaffold.materialScaffoldEdgeToE
 import io.github.xiaotong6666.uihelper.material.scaffold.materialTopBarEdgeToEdgeInsets
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
-import top.yukonga.miuix.kmp.basic.DropdownImpl
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import io.github.xiaotong6666.uihelper.popup.PopupMenuGroup
+import io.github.xiaotong6666.uihelper.popup.PopupMenuIconButton
+import io.github.xiaotong6666.uihelper.popup.PopupMenuItem
+import io.github.xiaotong6666.uihelper.popup.hasPopupMenuItems
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
-import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -77,6 +70,69 @@ data class DetailSettingsOverflowAction(
     val onClick: () -> Unit,
 )
 
+enum class DetailToolbarActionStyle {
+    Default,
+    Accent,
+}
+
+data class DetailToolbarAction(
+    val icon: ImageVector,
+    val onClick: () -> Unit,
+    val contentDescription: String? = null,
+    val style: DetailToolbarActionStyle = DetailToolbarActionStyle.Default,
+)
+
+@Composable
+fun DetailPageHost(
+    title: String,
+    subtitle: String? = null,
+    onBack: (() -> Unit)? = null,
+    actions: List<DetailToolbarAction> = emptyList(),
+    overflowGroups: List<PopupMenuGroup> = emptyList(),
+    snackbarHost: @Composable () -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
+    floatingActionButtonPosition: FabPosition = FabPosition.End,
+    contentWindowInsets: WindowInsets? = null,
+    content: @Composable (PaddingValues, Modifier) -> Unit,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> DetailPageHostMiuix(
+            title = title,
+            subtitle = subtitle,
+            onBack = onBack,
+            actions = actions,
+            overflowGroups = overflowGroups,
+            contentWindowInsets = contentWindowInsets,
+            content = content,
+        )
+
+        UiMode.Material -> DetailPageHostMaterial(
+            title = title,
+            subtitle = subtitle,
+            onBack = onBack,
+            actions = actions,
+            overflowGroups = overflowGroups,
+            snackbarHost = snackbarHost,
+            floatingActionButton = floatingActionButton,
+            floatingActionButtonPosition = floatingActionButtonPosition,
+            contentWindowInsets = contentWindowInsets,
+            content = content,
+        )
+    }
+}
+
+@Composable
+fun DetailPageBody(
+    contentPadding: PaddingValues,
+    scrollModifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> DetailPageBodyMiuix(contentPadding, scrollModifier, content)
+        UiMode.Material -> DetailPageBodyMaterial(contentPadding, scrollModifier, content)
+    }
+}
+
 @Composable
 fun DetailSettingsHost(
     title: String,
@@ -85,10 +141,20 @@ fun DetailSettingsHost(
     overflowActions: List<DetailSettingsOverflowAction> = emptyList(),
     content: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
-    when (LocalUiMode.current) {
-        UiMode.Miuix -> DetailSettingsHostMiuix(title, onBack, onSave, overflowActions, content)
-        UiMode.Material -> DetailSettingsHostMaterial(title, onBack, onSave, overflowActions, content)
-    }
+    DetailPageHost(
+        title = title,
+        subtitle = null,
+        onBack = onBack,
+        actions = listOf(
+            DetailToolbarAction(
+                icon = Icons.Default.Check,
+                onClick = onSave,
+                style = DetailToolbarActionStyle.Accent,
+            ),
+        ),
+        overflowGroups = overflowActions.toOverflowGroups(),
+        content = content,
+    )
 }
 
 @Composable
@@ -97,70 +163,74 @@ fun DetailSettingsBody(
     scrollModifier: Modifier,
     content: @Composable () -> Unit,
 ) {
-    when (LocalUiMode.current) {
-        UiMode.Miuix -> DetailSettingsBodyMiuix(contentPadding, scrollModifier, content)
-        UiMode.Material -> DetailSettingsBodyMaterial(contentPadding, scrollModifier, content)
-    }
+    DetailPageBody(contentPadding, scrollModifier, content)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun DetailSettingsHostMaterial(
+private fun DetailPageHostMaterial(
     title: String,
-    onBack: () -> Unit,
-    onSave: () -> Unit,
-    overflowActions: List<DetailSettingsOverflowAction>,
+    subtitle: String?,
+    onBack: (() -> Unit)?,
+    actions: List<DetailToolbarAction>,
+    overflowGroups: List<PopupMenuGroup>,
+    snackbarHost: @Composable () -> Unit,
+    floatingActionButton: @Composable () -> Unit,
+    floatingActionButtonPosition: FabPosition,
+    contentWindowInsets: WindowInsets?,
     content: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-    val haptic = LocalHapticFeedback.current
-    var showOverflowMenu by remember { mutableStateOf(false) }
     ExpressiveScaffold(
-        contentWindowInsets = materialScaffoldEdgeToEdgeInsets(),
+        contentWindowInsets = contentWindowInsets ?: materialScaffoldEdgeToEdgeInsets(),
+        snackbarHost = snackbarHost,
+        floatingActionButton = floatingActionButton,
+        floatingActionButtonPosition = floatingActionButtonPosition,
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text(text = title, maxLines = 1) },
+                title = {
+                    Column {
+                        Text(text = title, maxLines = 1)
+                        if (!subtitle.isNullOrBlank()) {
+                            Text(
+                                text = subtitle,
+                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        colors = materialChromeIconButtonColors(),
-                    ) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+                    if (onBack != null) {
+                        IconButton(
+                            onClick = onBack,
+                            colors = materialChromeIconButtonColors(),
+                        ) {
+                            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+                        }
                     }
                 },
                 actions = {
-                    if (overflowActions.isNotEmpty()) {
-                        IconButton(
-                            onClick = { showOverflowMenu = true },
-                            colors = materialChromeIconButtonColors(),
-                        ) {
-                            Icon(Icons.Default.MoreVert, contentDescription = null)
-                            DropdownMenuPopup(
-                                expanded = showOverflowMenu,
-                                onDismissRequest = { showOverflowMenu = false },
-                            ) {
-                                DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                                    overflowActions.forEachIndexed { index, action ->
-                                        DropdownMenuItem(
-                                            selected = false,
-                                            text = { Text(action.label) },
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                                showOverflowMenu = false
-                                                action.onClick()
-                                            },
-                                            shapes = MenuDefaults.itemShape(index = index, count = overflowActions.size),
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                    if (hasPopupMenuItems(overflowGroups)) {
+                        PopupMenuIconButton(
+                            icon = Icons.Default.MoreVert,
+                            contentDescription = null,
+                            groups = overflowGroups,
+                        )
                     }
-                    IconButton(
-                        onClick = onSave,
-                        colors = materialAccentIconButtonColors(),
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = null)
+                    actions.forEach { action ->
+                        IconButton(
+                            onClick = action.onClick,
+                            colors = when (action.style) {
+                                DetailToolbarActionStyle.Accent -> materialAccentIconButtonColors()
+                                DetailToolbarActionStyle.Default -> materialChromeIconButtonColors()
+                            },
+                        ) {
+                            Icon(
+                                imageVector = action.icon,
+                                contentDescription = action.contentDescription,
+                            )
+                        }
                     }
                 },
                 colors = expressiveTopAppBarColors(),
@@ -174,7 +244,7 @@ private fun DetailSettingsHostMaterial(
 }
 
 @Composable
-private fun DetailSettingsBodyMaterial(
+private fun DetailPageBodyMaterial(
     contentPadding: PaddingValues,
     scrollModifier: Modifier,
     content: @Composable () -> Unit,
@@ -195,22 +265,24 @@ private fun DetailSettingsBodyMaterial(
 }
 
 @Composable
-private fun DetailSettingsHostMiuix(
+private fun DetailPageHostMiuix(
     title: String,
-    onBack: () -> Unit,
-    onSave: () -> Unit,
-    overflowActions: List<DetailSettingsOverflowAction>,
+    subtitle: String?,
+    onBack: (() -> Unit)?,
+    actions: List<DetailToolbarAction>,
+    overflowGroups: List<PopupMenuGroup>,
+    contentWindowInsets: WindowInsets?,
     content: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    var showOverflowMenu by remember { mutableStateOf(false) }
-    MiuixScaffold(
-        topBar = {
-            MiuixTopAppBar(
-                title = title,
-                color = MiuixTheme.colorScheme.surface,
-                titleColor = MiuixTheme.colorScheme.onSurface,
-                navigationIcon = {
+    val topBar: @Composable () -> Unit = {
+        MiuixTopAppBar(
+            title = title,
+            subtitle = subtitle.orEmpty(),
+            color = MiuixTheme.colorScheme.surface,
+            titleColor = MiuixTheme.colorScheme.onSurface,
+            navigationIcon = {
+                if (onBack != null) {
                     MiuixIconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -218,58 +290,48 @@ private fun DetailSettingsHostMiuix(
                             tint = MiuixTheme.colorScheme.onSurface,
                         )
                     }
-                },
-                actions = {
-                    if (overflowActions.isNotEmpty()) {
-                        MiuixIconButton(
-                            onClick = { showOverflowMenu = true },
-                            holdDownState = showOverflowMenu,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                tint = MiuixTheme.colorScheme.onSurface,
-                                contentDescription = null,
-                            )
-                        }
-                        OverlayListPopup(
-                            show = showOverflowMenu,
-                            alignment = PopupPositionProvider.Align.TopEnd,
-                            onDismissRequest = { showOverflowMenu = false },
-                        ) {
-                            ListPopupColumn {
-                                overflowActions.forEachIndexed { index, action ->
-                                    DropdownImpl(
-                                        text = action.label,
-                                        optionSize = overflowActions.size,
-                                        isSelected = false,
-                                        index = index,
-                                        onSelectedIndexChange = {
-                                            showOverflowMenu = false
-                                            action.onClick()
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    MiuixIconButton(onClick = onSave) {
+                }
+            },
+            actions = {
+                if (hasPopupMenuItems(overflowGroups)) {
+                    PopupMenuIconButton(
+                        icon = Icons.Default.MoreVert,
+                        contentDescription = null,
+                        groups = overflowGroups,
+                    )
+                }
+                actions.forEach { action ->
+                    MiuixIconButton(onClick = action.onClick) {
                         Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
+                            imageVector = action.icon,
+                            contentDescription = action.contentDescription,
                             tint = MiuixTheme.colorScheme.onSurface,
                         )
                     }
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-    ) { paddingValues ->
-        content(paddingValues, Modifier.nestedScroll(scrollBehavior.nestedScrollConnection))
+                }
+            },
+            scrollBehavior = scrollBehavior,
+        )
+    }
+
+    if (contentWindowInsets != null) {
+        MiuixScaffold(
+            contentWindowInsets = contentWindowInsets,
+            topBar = topBar,
+        ) { paddingValues ->
+            content(paddingValues, Modifier.nestedScroll(scrollBehavior.nestedScrollConnection))
+        }
+    } else {
+        MiuixScaffold(
+            topBar = topBar,
+        ) { paddingValues ->
+            content(paddingValues, Modifier.nestedScroll(scrollBehavior.nestedScrollConnection))
+        }
     }
 }
 
 @Composable
-private fun DetailSettingsBodyMiuix(
+private fun DetailPageBodyMiuix(
     contentPadding: PaddingValues,
     scrollModifier: Modifier,
     content: @Composable () -> Unit,
@@ -296,4 +358,18 @@ private fun DetailSettingsBodyMiuix(
             }
         }
     }
+}
+
+private fun List<DetailSettingsOverflowAction>.toOverflowGroups(): List<PopupMenuGroup> {
+    if (isEmpty()) return emptyList()
+    return listOf(
+        PopupMenuGroup(
+            items = map { action ->
+                PopupMenuItem(
+                    label = action.label,
+                    onClick = action.onClick,
+                )
+            },
+        ),
+    )
 }

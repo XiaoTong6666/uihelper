@@ -54,8 +54,12 @@ These packages are the supported surface for feature and page code.
   - shell and nested-scroll integration used by app-level containers
   - includes the public dual-skin host API for top-level navigation shells
   - public entry points should be shell-style APIs such as `AdaptiveNavigationShell`, `PageHost`, and `PageChrome`
+- `io.github.xiaotong6666.uihelper.dialog`
+  - reusable loading and confirm dialog handles plus dual-skin presenters
 - `io.github.xiaotong6666.uihelper.navigation3`
   - reusable navigator helpers
+- `io.github.xiaotong6666.uihelper.popup`
+  - dual-skin popup and menu models used by app chrome and settings surfaces
 - `io.github.xiaotong6666.uihelper.extensions.androidapp`
   - optional Android-app-specific helpers that remain generic enough to reuse
 

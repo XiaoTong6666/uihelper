@@ -22,6 +22,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -65,12 +66,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -157,6 +160,7 @@ private fun MaterialFilterableListHost(
     materialSearchResultContent: @Composable (contentModifier: Modifier, closeSearch: () -> Unit) -> Unit,
 ) {
     val surfaces = materialSurfaceLadder()
+    val haptic = LocalHapticFeedback.current
     val pullToRefreshState = rememberMaterialPullToRefreshState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -286,33 +290,46 @@ private fun MaterialFilterableListHost(
         },
         enabled = isCurrentPage,
     ) { pageHost ->
-        PullToRefreshBox(
-            modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding()),
-            isRefreshing = isRefreshing,
-            onRefresh = onRefresh,
-            state = pullToRefreshState,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 74.dp),
-                    isRefreshing = isRefreshing,
-                    state = pullToRefreshState,
-                )
-            },
-        ) {
-            materialMainContent(
-                pageHost.nestedScroll(Modifier.fillMaxSize()),
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = contentPadding.calculateTopPadding()),
             ) {
                 SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                        .padding(horizontal = 16.dp)
                         .padding(bottom = 12.dp),
                     state = searchBarState,
                     inputField = inputField,
                     colors = SearchBarDefaults.colors(containerColor = surfaces.chrome),
                 )
+            }
+
+            PullToRefreshBox(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    onRefresh()
+                },
+                state = pullToRefreshState,
+                indicator = {
+                    PullToRefreshDefaults.LoadingIndicator(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        isRefreshing = isRefreshing,
+                        state = pullToRefreshState,
+                    )
+                },
+            ) {
+                materialMainContent(
+                    pageHost.nestedScroll(Modifier.fillMaxSize()),
+                ) {
+                }
             }
         }
     }

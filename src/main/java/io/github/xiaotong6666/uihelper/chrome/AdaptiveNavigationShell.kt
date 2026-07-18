@@ -41,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -68,6 +69,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.MiuixPopupHost
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import kotlin.math.abs
 import top.yukonga.miuix.kmp.basic.NavigationBar as MiuixNavigationBar
@@ -78,6 +80,11 @@ data class NavigationShellItem(
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 )
+
+enum class NavigationShellTopBarMode {
+    Scrollable,
+    Collapsed,
+}
 
 private class NavigationShellPagerState(
     val pagerState: PagerState,
@@ -142,6 +149,7 @@ fun AdaptiveNavigationShell(
     selectedIndex: Int,
     onSelectedIndexChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    topBarMode: NavigationShellTopBarMode = NavigationShellTopBarMode.Scrollable,
     content: @Composable (pageIndex: Int, contentPadding: PaddingValues, isCurrentPage: Boolean, pageModifier: Modifier) -> Unit,
 ) {
     if (items.isEmpty()) return
@@ -155,6 +163,7 @@ fun AdaptiveNavigationShell(
     val appChromeState = rememberAppChromeState()
     val chromeSpec = appChromeState.spec
     val miuixScrollBehavior = MiuixScrollBehavior()
+    val isTopBarScrollable = topBarMode == NavigationShellTopBarMode.Scrollable
     val onPageSelected: (Int) -> Unit = { index ->
         if (shellPagerState.selectedPage != index) {
             shellPagerState.animateToPage(index)
@@ -186,11 +195,15 @@ fun AdaptiveNavigationShell(
 
     when (LocalUiMode.current) {
         UiMode.Miuix -> {
-            val pageHostHandle = remember(miuixScrollBehavior) {
-                PageHostHandle(
-                    nestedScrollConnection = miuixScrollBehavior.nestedScrollConnection,
-                    collapsedFractionProvider = { miuixScrollBehavior.state.collapsedFraction },
-                )
+            val pageHostHandle = remember(miuixScrollBehavior, isTopBarScrollable) {
+                if (isTopBarScrollable) {
+                    PageHostHandle(
+                        nestedScrollConnection = miuixScrollBehavior.nestedScrollConnection,
+                        collapsedFractionProvider = { miuixScrollBehavior.state.collapsedFraction },
+                    )
+                } else {
+                    PageHostHandle(collapsedFractionProvider = { 1f })
+                }
             }
             top.yukonga.miuix.kmp.basic.Scaffold(
                 modifier = Modifier
@@ -198,15 +211,25 @@ fun AdaptiveNavigationShell(
                     .then(modifier),
                 topBar = {
                     val defaultTopBar: ComposableContent = {
-                        top.yukonga.miuix.kmp.basic.TopAppBar(
-                            title = activeItem.title,
-                            color = MiuixTheme.colorScheme.surface,
-                            titleColor = MiuixTheme.colorScheme.onSurface,
-                            actions = {
-                                chromeSpec.miuixActions?.invoke()
-                            },
-                            scrollBehavior = miuixScrollBehavior,
-                        )
+                        if (isTopBarScrollable) {
+                            top.yukonga.miuix.kmp.basic.TopAppBar(
+                                title = activeItem.title,
+                                color = MiuixTheme.colorScheme.surface,
+                                titleColor = MiuixTheme.colorScheme.onSurface,
+                                actions = {
+                                    chromeSpec.miuixActions?.invoke()
+                                },
+                                scrollBehavior = miuixScrollBehavior,
+                            )
+                        } else {
+                            top.yukonga.miuix.kmp.basic.SmallTopAppBar(
+                                title = activeItem.title,
+                                color = MiuixTheme.colorScheme.surface,
+                                actions = {
+                                    chromeSpec.miuixActions?.invoke()
+                                },
+                            )
+                        }
                     }
                     val miuixTopBar = chromeSpec.miuixTopBar
                     val miuixTopBarWrapper = chromeSpec.miuixTopBarWrapper
@@ -216,7 +239,7 @@ fun AdaptiveNavigationShell(
                         else -> defaultTopBar()
                     }
                 },
-                popupHost = chromeSpec.miuixPopupHost ?: {},
+                popupHost = chromeSpec.miuixPopupHost ?: { MiuixPopupHost() },
                 bottomBar = if (chromeSpec.hideBottomBar) {
                     {}
                 } else {
@@ -237,8 +260,10 @@ fun AdaptiveNavigationShell(
                 CompositionLocalProvider(
                     LocalAppChromeState provides appChromeState,
                     LocalPageHostHandle provides pageHostHandle,
-                    LocalMiuixNestedScrollConnection provides miuixScrollBehavior.nestedScrollConnection,
-                    LocalMiuixCollapsedFractionProvider provides { miuixScrollBehavior.state.collapsedFraction },
+                    LocalMiuixNestedScrollConnection provides miuixScrollBehavior.nestedScrollConnection.takeIf { isTopBarScrollable },
+                    LocalMiuixCollapsedFractionProvider provides {
+                        if (isTopBarScrollable) miuixScrollBehavior.state.collapsedFraction else 1f
+                    },
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         HorizontalPager(
@@ -249,7 +274,7 @@ fun AdaptiveNavigationShell(
                             val pageModifier = Modifier
                                 .then(if (page == pagerState.currentPage) Modifier.overScrollVertical() else Modifier)
                                 .then(
-                                    if (chromeSpec.consumeOuterScroll) {
+                                    if (chromeSpec.consumeOuterScroll || !isTopBarScrollable) {
                                         Modifier
                                     } else {
                                         Modifier.nestedScroll(miuixScrollBehavior.nestedScrollConnection)
@@ -272,18 +297,22 @@ fun AdaptiveNavigationShell(
         UiMode.Material -> {
             val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
             val surfaces = materialSurfaceLadder()
-            val pageHostHandle = remember(scrollBehavior) {
-                PageHostHandle(
-                    nestedScrollConnection = scrollBehavior.nestedScrollConnection,
-                    collapsedFractionProvider = { scrollBehavior.state.collapsedFraction },
-                )
+            val pageHostHandle = remember(scrollBehavior, isTopBarScrollable) {
+                if (isTopBarScrollable) {
+                    PageHostHandle(
+                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                        collapsedFractionProvider = { scrollBehavior.state.collapsedFraction },
+                    )
+                } else {
+                    PageHostHandle(collapsedFractionProvider = { 1f })
+                }
             }
             ExpressiveScaffold(
                 modifier = Modifier
                     .fillMaxSize()
                     .then(modifier)
                     .then(
-                        if (chromeSpec.consumeOuterScroll) {
+                        if (chromeSpec.consumeOuterScroll || !isTopBarScrollable) {
                             Modifier
                         } else {
                             Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -291,15 +320,26 @@ fun AdaptiveNavigationShell(
                     ),
                 contentWindowInsets = materialScaffoldEdgeToEdgeInsets(),
                 topBar = chromeSpec.materialTopBar ?: {
-                    LargeFlexibleTopAppBar(
-                        title = { Text(text = activeItem.title) },
-                        actions = {
-                            chromeSpec.materialActions?.invoke(this)
-                        },
-                        colors = expressiveTopAppBarColors(),
-                        scrollBehavior = scrollBehavior,
-                        windowInsets = materialTopBarEdgeToEdgeInsets(),
-                    )
+                    if (isTopBarScrollable) {
+                        LargeFlexibleTopAppBar(
+                            title = { Text(text = activeItem.title) },
+                            actions = {
+                                chromeSpec.materialActions?.invoke(this)
+                            },
+                            colors = expressiveTopAppBarColors(),
+                            scrollBehavior = scrollBehavior,
+                            windowInsets = materialTopBarEdgeToEdgeInsets(),
+                        )
+                    } else {
+                        TopAppBar(
+                            title = { Text(text = activeItem.title) },
+                            actions = {
+                                chromeSpec.materialActions?.invoke(this)
+                            },
+                            colors = expressiveTopAppBarColors(),
+                            windowInsets = materialTopBarEdgeToEdgeInsets(),
+                        )
+                    }
                 },
                 bottomBar = if (chromeSpec.hideBottomBar) {
                     {}
@@ -332,7 +372,7 @@ fun AdaptiveNavigationShell(
                 CompositionLocalProvider(
                     LocalAppChromeState provides appChromeState,
                     LocalPageHostHandle provides pageHostHandle,
-                    LocalMaterialNestedScrollConnection provides scrollBehavior.nestedScrollConnection,
+                    LocalMaterialNestedScrollConnection provides scrollBehavior.nestedScrollConnection.takeIf { isTopBarScrollable },
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         HorizontalPager(

@@ -10,6 +10,38 @@ Its design goal is:
 
 This module is intended to be extractable and reusable in other projects.
 
+## Reuse
+
+`uihelper` is a standalone Android library project. It requires `compileSdk 37`, `minSdk 31`, Java 17, and the Kotlin Compose compiler plugin.
+
+For active development, add this repository as a Git submodule or sibling directory, then include the module in the consumer's `settings.gradle.kts`:
+
+```kotlin
+include(":uihelper")
+```
+
+Consume it from the Android app module:
+
+```kotlin
+dependencies {
+    implementation(project(":uihelper"))
+}
+```
+
+For a local binary dependency, publish the release AAR from this directory:
+
+```bash
+./gradlew publishReleasePublicationToMavenLocal
+```
+
+Then add `mavenLocal()` to the consumer's repositories and use:
+
+```kotlin
+implementation("io.github.xiaotong6666:uihelper:<git-commit-count>")
+```
+
+The published version is `git rev-list --count HEAD` from the `uihelper` repository, so it advances with each committed change.
+
 ## Scope
 
 `uihelper` should own:

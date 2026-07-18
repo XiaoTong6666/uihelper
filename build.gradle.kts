@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
+import org.gradle.api.publish.maven.MavenPublication
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    `maven-publish`
 }
+
+group = providers.gradleProperty("GROUP").getOrElse("io.github.xiaotong6666")
+val gitCommitCount = providers.exec {
+    workingDir = projectDir
+    commandLine("git", "rev-list", "--count", "HEAD")
+}.standardOutput.asText.map { it.trim() }
+version = gitCommitCount.get()
 
 android {
     namespace = "io.github.xiaotong6666.uihelper"
@@ -43,6 +53,33 @@ android {
     buildFeatures {
         compose = true
     }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            artifactId = "uihelper"
+            afterEvaluate {
+                from(components["release"])
+            }
+            pom {
+                name.set("uihelper")
+                description.set("Adaptive Material and Miuix Compose components for utility-style Android apps.")
+                url.set("https://github.com/XiaoTong6666/uihelper")
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -57,7 +94,7 @@ dependencies {
     implementation(libs.androidx.navigationevent.compose)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.commonmark)
-    implementation(libs.miuix)
+    implementation(libs.miuix.ui)
     implementation(libs.miuix.preference)
     implementation(libs.miuix.navigation3.ui)
 

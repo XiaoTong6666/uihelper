@@ -42,18 +42,32 @@ import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
-fun LoadingDialogMiuix(showDialog: State<Boolean>) {
+fun LoadingDialogMiuix(showDialog: State<Boolean>, message: State<String?>) {
+    val loadingMessage = message.value
     WindowDialog(
         show = showDialog.value,
         content = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.CenterStart,
             ) {
-                InfiniteProgressIndicator()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    InfiniteProgressIndicator(color = MiuixTheme.colorScheme.onBackground)
+                    loadingMessage?.takeIf { it.isNotBlank() }?.let { text ->
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = text,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                }
             }
         },
     )

@@ -80,8 +80,8 @@ interface DialogHandle {
 }
 
 interface LoadingDialogHandle : DialogHandle {
-    suspend fun <R> withLoading(block: suspend () -> R): R
-    fun showLoading()
+    suspend fun <R> withLoading(message: String? = null, block: suspend () -> R): R
+    fun showLoading(message: String? = null)
 }
 
 sealed interface ConfirmResult {
@@ -149,19 +149,23 @@ private abstract class DialogHandleBase(
 
 private class LoadingDialogHandleImpl(
     visible: MutableState<Boolean>,
+    private val message: MutableState<String?>,
     coroutineScope: CoroutineScope,
 ) : DialogHandleBase(visible, coroutineScope),
     LoadingDialogHandle {
-    override suspend fun <R> withLoading(block: suspend () -> R): R = coroutineScope.async {
+    override suspend fun <R> withLoading(message: String?, block: suspend () -> R): R = coroutineScope.async {
         try {
+            this@LoadingDialogHandleImpl.message.value = message
             visible.value = true
             block()
         } finally {
             visible.value = false
+            this@LoadingDialogHandleImpl.message.value = null
         }
     }.await()
 
-    override fun showLoading() {
+    override fun showLoading(message: String?) {
+        this.message.value = message
         show()
     }
 
@@ -366,15 +370,16 @@ private class ConfirmDialogHandleImpl(
 @Composable
 fun rememberLoadingDialog(): LoadingDialogHandle {
     val visible = remember { mutableStateOf(false) }
+    val message = remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     when (LocalUiMode.current) {
-        UiMode.Miuix -> LoadingDialogMiuix(visible)
-        UiMode.Material -> LoadingDialogMaterial(visible)
+        UiMode.Miuix -> LoadingDialogMiuix(visible, message)
+        UiMode.Material -> LoadingDialogMaterial(visible, message)
     }
 
     return remember {
-        LoadingDialogHandleImpl(visible, coroutineScope)
+        LoadingDialogHandleImpl(visible, message, coroutineScope)
     }
 }
 

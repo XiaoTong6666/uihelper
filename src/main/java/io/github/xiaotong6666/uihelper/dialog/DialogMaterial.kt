@@ -19,7 +19,12 @@
 package io.github.xiaotong6666.uihelper.dialog
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,18 +40,33 @@ import androidx.compose.ui.window.DialogProperties
 import io.github.xiaotong6666.uihelper.material.primitive.ExpressiveDialog
 
 @Composable
-fun LoadingDialogMaterial(showDialog: State<Boolean>) {
+fun LoadingDialogMaterial(showDialog: State<Boolean>, message: State<String?>) {
     if (showDialog.value) {
+        val loadingMessage = message.value
         Dialog(
             onDismissRequest = {},
-            properties = DialogProperties(dismissOnClickOutside = false, dismissOnBackPress = false),
+            properties = DialogProperties(
+                dismissOnClickOutside = false,
+                dismissOnBackPress = false,
+            ),
         ) {
             Surface(
-                modifier = Modifier.size(100.dp),
+                modifier = if (loadingMessage.isNullOrBlank()) Modifier.size(100.dp) else Modifier.widthIn(min = 220.dp),
                 shape = MaterialTheme.shapes.extraLarge,
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    LoadingIndicator()
+                if (loadingMessage.isNullOrBlank()) {
+                    Box(contentAlignment = Alignment.Center) {
+                        LoadingIndicator()
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LoadingIndicator(modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text(text = loadingMessage, modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }

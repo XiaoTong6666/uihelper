@@ -31,12 +31,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -267,7 +267,7 @@ private fun MaterialPopupMenu(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 group.items.forEachIndexed { itemIndex, item ->
-                    DropdownMenuItem(
+                    SelectableDropdownMenuItem(
                         text = { Text(item.label) },
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)

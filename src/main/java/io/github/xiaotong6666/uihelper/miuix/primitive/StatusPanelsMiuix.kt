@@ -18,6 +18,8 @@
 
 package io.github.xiaotong6666.uihelper.miuix.primitive
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +32,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -54,8 +57,16 @@ fun StatusChipMiuix(
     emphasized: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    val containerColor = if (emphasized) MiuixTheme.colorScheme.primaryVariant else MiuixTheme.colorScheme.surfaceContainerHighest
-    val contentColor = if (emphasized) MiuixTheme.colorScheme.onPrimaryVariant else MiuixTheme.colorScheme.onSurfaceContainerHighest
+    val containerColor by animateColorAsState(
+        targetValue = if (emphasized) MiuixTheme.colorScheme.primaryVariant else MiuixTheme.colorScheme.surfaceContainerHighest,
+        animationSpec = spring(),
+        label = "status_chip_container",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (emphasized) MiuixTheme.colorScheme.onPrimaryVariant else MiuixTheme.colorScheme.onSurfaceContainerHighest,
+        animationSpec = spring(),
+        label = "status_chip_content",
+    )
     Card(modifier = modifier.heightIn(min = 118.dp), colors = CardDefaults.defaultColors(color = containerColor, contentColor = contentColor), onClick = onClick, insideMargin = PaddingValues(0.dp)) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(text = label.uppercase(Locale.US), style = MiuixTheme.textStyles.footnote2, color = if (emphasized) MiuixTheme.colorScheme.onPrimaryVariant.copy(alpha = 0.72f) else MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -140,8 +151,20 @@ fun DeviceStatusListMiuix(infoPairs: List<Pair<String, String>>) {
 
 @Composable
 fun RuntimeSummaryCardMiuix(summaryText: String, snapshotText: String, emphasized: Boolean) {
-    val contentColor = if (emphasized) MiuixTheme.colorScheme.onErrorContainer else MiuixTheme.colorScheme.onSurface
-    val cardColors = if (emphasized) CardDefaults.defaultColors(color = MiuixTheme.colorScheme.errorContainer, contentColor = contentColor) else CardDefaults.defaultColors(contentColor = contentColor)
+    val containerColor by animateColorAsState(
+        targetValue = if (emphasized) MiuixTheme.colorScheme.errorContainer else MiuixTheme.colorScheme.surfaceContainer,
+        animationSpec = spring(),
+        label = "runtime_summary_container",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (emphasized) MiuixTheme.colorScheme.onErrorContainer else MiuixTheme.colorScheme.onSurface,
+        animationSpec = spring(),
+        label = "runtime_summary_content",
+    )
+    val cardColors = CardDefaults.defaultColors(
+        color = containerColor,
+        contentColor = contentColor,
+    )
     Card(modifier = Modifier.fillMaxWidth(), colors = cardColors, insideMargin = PaddingValues(0.dp)) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (summaryText.isNotEmpty()) Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) { Text(text = summaryText, style = MiuixTheme.textStyles.body1, color = contentColor) }

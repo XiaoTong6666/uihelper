@@ -94,7 +94,7 @@ fun SettingsInfoItemMiuix(title: String, value: String, icon: ImageVector? = nul
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(22.dp),
-                    tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    tint = MiuixTheme.colorScheme.onBackground,
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {

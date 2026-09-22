@@ -27,6 +27,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -45,21 +46,49 @@ import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private data class IconKey(val uid: Int, val packageName: String, val sourceDir: String?)
+private data class IconKey(
+    val uid: Int,
+    val packageName: String,
+    val sourceDir: String?,
+    val sizePx: Int,
+)
+
+enum class AppIconVariant {
+    Default,
+    Detail,
+}
 
 @Composable
 fun AppIconImage(
     modifier: Modifier = Modifier,
     applicationInfo: ApplicationInfo,
     label: String,
+    variant: AppIconVariant = AppIconVariant.Default,
 ) {
     val density = LocalDensity.current
     val context = LocalContext.current
-    val targetSizePx = with(density) { 48.dp.roundToPx() }
+    val displaySize = when (variant) {
+        AppIconVariant.Default -> null
 
-    val iconKey = IconKey(applicationInfo.uid, applicationInfo.packageName, applicationInfo.sourceDir)
+        AppIconVariant.Detail -> when (LocalUiMode.current) {
+            UiMode.Miuix -> 64.dp
+            UiMode.Material -> 48.dp
+        }
+    }
+    val targetSizePx = with(density) { (displaySize ?: 48.dp).roundToPx() }
 
-    Box(modifier = modifier) {
+    val iconKey = IconKey(
+        uid = applicationInfo.uid,
+        packageName = applicationInfo.packageName,
+        sourceDir = applicationInfo.sourceDir,
+        sizePx = targetSizePx,
+    )
+
+    Box(
+        modifier = modifier.then(
+            if (displaySize != null) Modifier.size(displaySize) else Modifier,
+        ),
+    ) {
         val initiallyCached = remember(iconKey) {
             AppIconCache.getCached(applicationInfo, targetSizePx) != null
         }
@@ -108,13 +137,14 @@ fun AppIconImage(
     modifier: Modifier = Modifier,
     packageInfo: PackageInfo,
     label: String,
+    variant: AppIconVariant = AppIconVariant.Default,
 ) {
     val appInfo = packageInfo.applicationInfo
     if (appInfo == null) {
         PlaceHolderBox(modifier)
         return
     }
-    AppIconImage(modifier, appInfo, label)
+    AppIconImage(modifier, appInfo, label, variant)
 }
 
 @Composable

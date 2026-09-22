@@ -55,6 +55,7 @@ import androidx.compose.material3.rememberContainedSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +67,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -81,15 +83,45 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.material.materialChromeIconButtonColors
 import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
+import io.github.xiaotong6666.uihelper.miuix.effect.LocalMiuixBlurBackdrop
 import io.github.xiaotong6666.uihelper.miuix.primitive.CollapsedSearchBox
 import io.github.xiaotong6666.uihelper.miuix.primitive.SearchBarFake
 import io.github.xiaotong6666.uihelper.miuix.primitive.SearchOverlayPager
+import io.github.xiaotong6666.uihelper.miuix.primitive.deferredTopPadding
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState as rememberMaterialPullToRefreshState
+import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState as rememberMiuixPullToRefreshState
+
+@Immutable
+data class FilterableListAction(
+    val icon: ImageVector,
+    val contentDescription: String? = null,
+    val onClick: () -> Unit,
+)
+
+@Immutable
+data class FilterableListRefreshTexts(
+    val pulling: String,
+    val release: String,
+    val refreshing: String,
+    val complete: String,
+) {
+    internal fun asList(): List<String> = listOf(pulling, release, refreshing, complete)
+}
+
+@Immutable
+data class FilterableListContent(
+    val materialMain: @Composable (Modifier) -> Unit,
+    val materialSearchResults: @Composable (Modifier, closeSearch: () -> Unit) -> Unit,
+    val miuixMain: @Composable (Modifier) -> Unit,
+    val miuixSearchResults: @Composable (Modifier, closeSearch: () -> Unit) -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,21 +132,9 @@ fun FilterableListHost(
     onRefresh: () -> Unit,
     contentPadding: PaddingValues,
     isCurrentPage: Boolean = true,
-    materialActions: (@Composable androidx.compose.foundation.layout.RowScope.() -> Unit)? = null,
-    miuixActions: (@Composable () -> Unit)? = null,
-    materialMainContent: @Composable (contentModifier: Modifier, searchBar: @Composable () -> Unit) -> Unit,
-    materialSearchResultContent: @Composable (contentModifier: Modifier, closeSearch: () -> Unit) -> Unit,
-    miuixMainContent: @Composable (contentModifier: Modifier, listTopPadding: Dp, dynamicTopPadding: Dp) -> Unit,
-    miuixSearchResultContent: @Composable (contentModifier: Modifier, dynamicTopPadding: Dp, closeSearch: () -> Unit) -> Unit,
-    miuixDefaultResultContent: (@Composable () -> Unit)? = null,
-    miuixRefreshTexts: List<String>? = null,
-    miuixCollapsedSearchField: @Composable (dynamicTopPadding: Dp, placeholder: String) -> Unit = { dynamicTopPadding, placeholder ->
-        SearchBarFake(
-            label = placeholder,
-            searchBarTopPadding = dynamicTopPadding,
-            bottomPadding = 0.dp,
-        )
-    },
+    action: FilterableListAction? = null,
+    refreshTexts: FilterableListRefreshTexts? = null,
+    content: FilterableListContent,
 ) {
     when (io.github.xiaotong6666.uihelper.mode.LocalUiMode.current) {
         io.github.xiaotong6666.uihelper.mode.UiMode.Material -> MaterialFilterableListHost(
@@ -124,9 +144,9 @@ fun FilterableListHost(
             onRefresh = onRefresh,
             contentPadding = contentPadding,
             isCurrentPage = isCurrentPage,
-            materialActions = materialActions,
-            materialMainContent = materialMainContent,
-            materialSearchResultContent = materialSearchResultContent,
+            action = action,
+            mainContent = content.materialMain,
+            searchResultContent = content.materialSearchResults,
         )
 
         io.github.xiaotong6666.uihelper.mode.UiMode.Miuix -> MiuixFilterableListHost(
@@ -136,12 +156,10 @@ fun FilterableListHost(
             onRefresh = onRefresh,
             contentPadding = contentPadding,
             isCurrentPage = isCurrentPage,
-            miuixActions = miuixActions,
-            miuixMainContent = miuixMainContent,
-            miuixSearchResultContent = miuixSearchResultContent,
-            miuixDefaultResultContent = miuixDefaultResultContent,
-            miuixRefreshTexts = miuixRefreshTexts,
-            miuixCollapsedSearchField = miuixCollapsedSearchField,
+            action = action,
+            refreshTexts = refreshTexts,
+            mainContent = content.miuixMain,
+            searchResultContent = content.miuixSearchResults,
         )
     }
 }
@@ -155,9 +173,9 @@ private fun MaterialFilterableListHost(
     onRefresh: () -> Unit,
     contentPadding: PaddingValues,
     isCurrentPage: Boolean,
-    materialActions: (@Composable androidx.compose.foundation.layout.RowScope.() -> Unit)? = null,
-    materialMainContent: @Composable (contentModifier: Modifier, searchBar: @Composable () -> Unit) -> Unit,
-    materialSearchResultContent: @Composable (contentModifier: Modifier, closeSearch: () -> Unit) -> Unit,
+    action: FilterableListAction?,
+    mainContent: @Composable (Modifier) -> Unit,
+    searchResultContent: @Composable (Modifier, closeSearch: () -> Unit) -> Unit,
 ) {
     val surfaces = materialSurfaceLadder()
     val haptic = LocalHapticFeedback.current
@@ -273,14 +291,26 @@ private fun MaterialFilterableListHost(
     PageHost(
         spec = { pageHost ->
             AppChromeSpec(
-                materialActions = materialActions,
+                materialActions = action?.let { item ->
+                    {
+                        androidx.compose.material3.IconButton(
+                            onClick = item.onClick,
+                            colors = materialChromeIconButtonColors(),
+                        ) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.contentDescription,
+                            )
+                        }
+                    }
+                },
                 overlayContent = {
                     ExpandedFullScreenContainedSearchBar(
                         state = searchBarState,
                         inputField = inputField,
                         windowInsets = { SearchBarDefaults.fullScreenWindowInsets.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal) },
                     ) {
-                        materialSearchResultContent(
+                        searchResultContent(
                             pageHost.nestedScroll(Modifier.fillMaxSize()),
                             collapseAndClear,
                         )
@@ -326,10 +356,7 @@ private fun MaterialFilterableListHost(
                     )
                 },
             ) {
-                materialMainContent(
-                    pageHost.nestedScroll(Modifier.fillMaxSize()),
-                ) {
-                }
+                mainContent(pageHost.nestedScroll(Modifier.fillMaxSize()))
             }
         }
     }
@@ -343,16 +370,15 @@ private fun MiuixFilterableListHost(
     onRefresh: () -> Unit,
     contentPadding: PaddingValues,
     isCurrentPage: Boolean,
-    miuixActions: (@Composable () -> Unit)? = null,
-    miuixMainContent: @Composable (contentModifier: Modifier, listTopPadding: Dp, dynamicTopPadding: Dp) -> Unit,
-    miuixSearchResultContent: @Composable (contentModifier: Modifier, dynamicTopPadding: Dp, closeSearch: () -> Unit) -> Unit,
-    miuixDefaultResultContent: (@Composable () -> Unit)? = null,
-    miuixRefreshTexts: List<String>? = null,
-    miuixCollapsedSearchField: @Composable (dynamicTopPadding: Dp, placeholder: String) -> Unit,
+    action: FilterableListAction?,
+    refreshTexts: FilterableListRefreshTexts?,
+    mainContent: @Composable (Modifier) -> Unit,
+    searchResultContent: @Composable (Modifier, closeSearch: () -> Unit) -> Unit,
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val refreshTexts = miuixRefreshTexts ?: listOf(
+    val blurBackdrop = LocalMiuixBlurBackdrop.current
+    val resolvedRefreshTexts = refreshTexts?.asList() ?: listOf(
         "Pull to refresh",
         "Release to refresh",
         "Refreshing",
@@ -367,16 +393,25 @@ private fun MiuixFilterableListHost(
                         content()
                     }
                 },
-                miuixActions = miuixActions,
+                miuixActions = action?.let { item ->
+                    {
+                        MiuixIconButton(onClick = item.onClick) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.contentDescription,
+                                tint = MiuixTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                },
                 miuixPopupHost = {
                     state.SearchOverlayPager(
                         onStateChange = onStateChange,
-                        defaultResult = { miuixDefaultResultContent?.invoke() },
-                        searchBarTopPadding = 12.dp * (1f - pageHost.collapsedFraction),
+                        defaultResult = { Box(modifier = Modifier.fillMaxSize()) },
+                        searchBarTopPadding = 12.dp,
                     ) {
-                        miuixSearchResultContent(
+                        searchResultContent(
                             Modifier.fillMaxSize(),
-                            12.dp * (1f - pageHost.collapsedFraction),
                         ) {
                             onStateChange(state.copy(query = "", current = SearchPageState.Status.COLLAPSED))
                         }
@@ -387,7 +422,9 @@ private fun MiuixFilterableListHost(
         },
         enabled = isCurrentPage,
     ) { pageHost ->
-        val dynamicTopPadding = 12.dp * (1f - pageHost.collapsedFraction)
+        val dynamicTopPadding = remember(pageHost) {
+            { 12.dp * (1f - pageHost.collapsedFraction) }
+        }
 
         state.CollapsedSearchBox {
             val pullToRefreshState = rememberMiuixPullToRefreshState()
@@ -402,12 +439,27 @@ private fun MiuixFilterableListHost(
                         .padding(top = searchTopPadding)
                         .alpha(if (state.isCollapsed()) 1f else 0f)
                         .onGloballyPositioned { coordinates ->
-                            with(density) {
-                                val newOffsetY = coordinates.positionInWindow().y.toDp()
-                                if (state.anchorOffsetY != newOffsetY) {
-                                    onStateChange(state.copy(anchorOffsetY = newOffsetY))
+                            if (state.isCollapsed()) {
+                                with(density) {
+                                    val newOffsetY =
+                                        coordinates.positionInWindow().y.toDp() +
+                                            dynamicTopPadding() -
+                                            12.dp
+                                    if (state.anchorOffsetY != newOffsetY) {
+                                        onStateChange(state.copy(anchorOffsetY = newOffsetY))
+                                    }
+                                    searchContainerBottom =
+                                        coordinates.positionInParent().y.toDp() +
+                                        coordinates.size.height.toDp() +
+                                        listSpacingBelowSearch
                                 }
-                                searchContainerBottom = coordinates.positionInParent().y.toDp() + coordinates.size.height.toDp() + listSpacingBelowSearch
+                            } else {
+                                with(density) {
+                                    searchContainerBottom =
+                                        coordinates.positionInParent().y.toDp() +
+                                        coordinates.size.height.toDp() +
+                                        listSpacingBelowSearch
+                                }
                             }
                         }
                         .then(
@@ -422,7 +474,12 @@ private fun MiuixFilterableListHost(
                             },
                         ),
                 ) {
-                    miuixCollapsedSearchField(dynamicTopPadding, state.placeholder)
+                    SearchBarFake(
+                        label = state.placeholder,
+                        modifier = Modifier.deferredTopPadding(dynamicTopPadding),
+                        searchBarTopPadding = 0.dp,
+                        bottomPadding = 0.dp,
+                    )
                 }
 
                 PullToRefresh(
@@ -430,17 +487,21 @@ private fun MiuixFilterableListHost(
                     isRefreshing = isRefreshing,
                     pullToRefreshState = pullToRefreshState,
                     onRefresh = onRefresh,
-                    refreshTexts = refreshTexts,
+                    refreshTexts = resolvedRefreshTexts,
                     contentPadding = PaddingValues(
                         start = contentPadding.calculateStartPadding(layoutDirection),
                         end = contentPadding.calculateEndPadding(layoutDirection),
                     ),
                 ) {
-                    miuixMainContent(
-                        pageHost.nestedScroll(Modifier),
-                        searchContainerBottom,
-                        dynamicTopPadding,
-                    )
+                    Box(
+                        modifier = if (blurBackdrop != null) {
+                            Modifier.layerBackdrop(blurBackdrop)
+                        } else {
+                            Modifier
+                        },
+                    ) {
+                        mainContent(pageHost.nestedScroll(Modifier))
+                    }
                 }
             }
         }

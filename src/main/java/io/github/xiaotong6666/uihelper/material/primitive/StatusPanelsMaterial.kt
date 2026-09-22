@@ -18,6 +18,8 @@
 
 package io.github.xiaotong6666.uihelper.material.primitive
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -51,8 +54,16 @@ fun StatusChipMaterial(
     emphasized: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    val containerColor = if (emphasized) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceBright
-    val contentColor = if (emphasized) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+    val containerColor by animateColorAsState(
+        targetValue = if (emphasized) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceBright,
+        animationSpec = spring(),
+        label = "status_chip_container",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (emphasized) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+        animationSpec = spring(),
+        label = "status_chip_content",
+    )
     TonalCardMaterial(
         modifier = modifier.heightIn(min = 124.dp),
         containerColor = containerColor,
@@ -264,8 +275,16 @@ fun RuntimeSummaryCardMaterial(
     snapshotText: String,
     emphasized: Boolean,
 ) {
-    val containerColor = if (emphasized) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceBright
-    val contentColor = if (emphasized) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
+    val containerColor by animateColorAsState(
+        targetValue = if (emphasized) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceBright,
+        animationSpec = spring(),
+        label = "runtime_summary_container",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (emphasized) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface,
+        animationSpec = spring(),
+        label = "runtime_summary_content",
+    )
     TonalCardMaterial(
         modifier = Modifier.fillMaxWidth(),
         containerColor = containerColor,

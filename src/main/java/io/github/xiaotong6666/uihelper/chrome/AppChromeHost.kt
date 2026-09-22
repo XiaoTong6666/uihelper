@@ -19,7 +19,6 @@
 package io.github.xiaotong6666.uihelper.chrome
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
@@ -40,8 +39,6 @@ data class AppChromeSpec(
     val materialTopBar: (@Composable () -> Unit)? = null,
     val miuixTopBar: (@Composable () -> Unit)? = null,
     val miuixTopBarWrapper: MiuixTopBarWrapper? = null,
-    val materialActions: (@Composable RowScope.() -> Unit)? = null,
-    val miuixActions: (@Composable () -> Unit)? = null,
     val miuixPopupHost: (@Composable () -> Unit)? = null,
     val overlayContent: (@Composable (PaddingValues) -> Unit)? = null,
     val hideBottomBar: Boolean = false,

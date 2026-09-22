@@ -38,12 +38,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
             freeCompilerArgs.addAll(
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
@@ -92,11 +92,12 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.navigationevent.compose)
-    implementation(libs.androidx.navigation3.runtime)
     implementation(libs.commonmark)
+    implementation(libs.appiconloader)
     implementation(libs.miuix.ui)
+    implementation(libs.miuix.blur)
     implementation(libs.miuix.preference)
-    implementation(libs.miuix.navigation3.ui)
+    implementation(libs.miuix.nav)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

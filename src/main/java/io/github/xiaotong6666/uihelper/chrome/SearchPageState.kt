@@ -21,15 +21,16 @@ package io.github.xiaotong6666.uihelper.chrome
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.miuix.effect.LocalMiuixBlurActive
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
-@Stable
+@Immutable
 data class SearchPageState(
     val placeholder: String,
     val query: String = "",
@@ -53,7 +54,7 @@ data class SearchPageState(
     fun TopAppBarAnim(
         modifier: Modifier = Modifier,
         visible: Boolean = shouldCollapse(),
-        backgroundColor: Color = colorScheme.surface,
+        backgroundColor: Color = if (LocalMiuixBlurActive.current) Color.Transparent else colorScheme.surface,
         content: @Composable () -> Unit,
     ) {
         Box(modifier = modifier) {

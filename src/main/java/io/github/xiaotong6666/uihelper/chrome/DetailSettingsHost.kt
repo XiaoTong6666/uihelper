@@ -19,9 +19,11 @@
 package io.github.xiaotong6666.uihelper.chrome
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -51,6 +53,10 @@ import io.github.xiaotong6666.uihelper.material.scaffold.ExpressiveScaffold
 import io.github.xiaotong6666.uihelper.material.scaffold.expressiveTopAppBarColors
 import io.github.xiaotong6666.uihelper.material.scaffold.materialScaffoldEdgeToEdgeInsets
 import io.github.xiaotong6666.uihelper.material.scaffold.materialTopBarEdgeToEdgeInsets
+import io.github.xiaotong6666.uihelper.miuix.effect.LocalMiuixBlurEnabled
+import io.github.xiaotong6666.uihelper.miuix.effect.MiuixBlurredChrome
+import io.github.xiaotong6666.uihelper.miuix.effect.miuixChromeColor
+import io.github.xiaotong6666.uihelper.miuix.effect.rememberMiuixBlurBackdrop
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import io.github.xiaotong6666.uihelper.popup.PopupMenuGroup
@@ -58,6 +64,7 @@ import io.github.xiaotong6666.uihelper.popup.PopupMenuIconButton
 import io.github.xiaotong6666.uihelper.popup.PopupMenuItem
 import io.github.xiaotong6666.uihelper.popup.hasPopupMenuItems
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -275,58 +282,76 @@ private fun DetailPageHostMiuix(
     content: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
+    val blurBackdrop = rememberMiuixBlurBackdrop(LocalMiuixBlurEnabled.current)
+    val blurActive = blurBackdrop != null
     val topBar: @Composable () -> Unit = {
-        MiuixTopAppBar(
-            title = title,
-            subtitle = subtitle.orEmpty(),
-            color = MiuixTheme.colorScheme.surface,
-            titleColor = MiuixTheme.colorScheme.onSurface,
-            navigationIcon = {
-                if (onBack != null) {
-                    MiuixIconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+        MiuixBlurredChrome(backdrop = blurBackdrop) {
+            MiuixTopAppBar(
+                title = title,
+                subtitle = subtitle.orEmpty(),
+                color = miuixChromeColor(blurActive),
+                titleColor = MiuixTheme.colorScheme.onSurface,
+                navigationIcon = {
+                    if (onBack != null) {
+                        MiuixIconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                                contentDescription = null,
+                                tint = MiuixTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    if (hasPopupMenuItems(overflowGroups)) {
+                        PopupMenuIconButton(
+                            icon = Icons.Default.MoreVert,
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurface,
+                            groups = overflowGroups,
                         )
                     }
-                }
-            },
-            actions = {
-                if (hasPopupMenuItems(overflowGroups)) {
-                    PopupMenuIconButton(
-                        icon = Icons.Default.MoreVert,
-                        contentDescription = null,
-                        groups = overflowGroups,
-                    )
-                }
-                actions.forEach { action ->
-                    MiuixIconButton(onClick = action.onClick) {
-                        Icon(
-                            imageVector = action.icon,
-                            contentDescription = action.contentDescription,
-                            tint = MiuixTheme.colorScheme.onSurface,
-                        )
+                    actions.forEach { action ->
+                        MiuixIconButton(onClick = action.onClick) {
+                            Icon(
+                                imageVector = action.icon,
+                                contentDescription = action.contentDescription,
+                                tint = MiuixTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
-                }
-            },
-            scrollBehavior = scrollBehavior,
-        )
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        }
+    }
+
+    val body: @Composable (PaddingValues) -> Unit = { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (blurBackdrop != null) {
+                        Modifier.layerBackdrop(blurBackdrop)
+                    } else {
+                        Modifier
+                    },
+                ),
+        ) {
+            content(paddingValues, Modifier.nestedScroll(scrollBehavior.nestedScrollConnection))
+        }
     }
 
     if (contentWindowInsets != null) {
         MiuixScaffold(
             contentWindowInsets = contentWindowInsets,
             topBar = topBar,
-        ) { paddingValues ->
-            content(paddingValues, Modifier.nestedScroll(scrollBehavior.nestedScrollConnection))
-        }
+            content = body,
+        )
     } else {
         MiuixScaffold(
             topBar = topBar,
-        ) { paddingValues ->
-            content(paddingValues, Modifier.nestedScroll(scrollBehavior.nestedScrollConnection))
-        }
+            content = body,
+        )
     }
 }
 
@@ -339,9 +364,9 @@ private fun DetailPageBodyMiuix(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .then(scrollModifier)
             .scrollEndHaptic()
-            .overScrollVertical(),
+            .overScrollVertical()
+            .then(scrollModifier),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,

@@ -1,53 +1,59 @@
 package io.github.xiaotong6666.uihelper.navigation3
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.navigation3.runtime.NavKey
+import top.yukonga.miuix.kmp.nav.core.NavBackStack
+import top.yukonga.miuix.kmp.nav.core.NavKey
+import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 
-class Navigator(initialKey: NavKey) {
-    val backStack: SnapshotStateList<NavKey> = mutableStateListOf(initialKey)
+class Navigator(
+    val backStack: NavBackStack,
+) {
 
     fun push(key: NavKey) {
-        backStack.add(key)
+        if (key !in backStack) {
+            backStack.add(key)
+        }
     }
 
     fun pop() {
+        if (backStack.size > 1) {
+            backStack.removeAt(backStack.lastIndex)
+        }
+    }
+
+    fun replace(key: NavKey) {
         if (backStack.isNotEmpty()) {
+            backStack[backStack.lastIndex] = key
+        } else {
+            backStack.add(key)
+        }
+    }
+
+    fun replaceAll(keys: List<NavKey>) {
+        if (keys.isEmpty()) return
+        backStack.clear()
+        backStack.addAll(keys)
+    }
+
+    fun popUntil(predicate: (NavKey) -> Boolean) {
+        while (backStack.size > 1 && !predicate(backStack.last())) {
             backStack.removeAt(backStack.lastIndex)
         }
     }
 
     fun current(): NavKey? = backStack.lastOrNull()
 
-    companion object {
-        fun saver(fallbackRoute: NavKey): Saver<Navigator, Any> = listSaver(
-            save = { navigator -> navigator.backStack.toList() },
-            restore = { savedList ->
-                val initialKey = savedList.firstOrNull() ?: fallbackRoute
-                val navigator = Navigator(initialKey)
-                navigator.backStack.clear()
-                if (savedList.isEmpty()) {
-                    navigator.backStack.add(fallbackRoute)
-                } else {
-                    navigator.backStack.addAll(savedList)
-                }
-                navigator
-            },
-        )
-    }
+    fun backStackSize(): Int = backStack.size
 }
 
 @Composable
-fun rememberNavigator(
-    startRoute: NavKey,
-    fallbackRoute: NavKey = startRoute,
-): Navigator = rememberSaveable(startRoute, fallbackRoute, saver = Navigator.saver(fallbackRoute)) {
-    Navigator(startRoute)
+inline fun <reified T : NavKey> rememberNavigator(startRoute: T): Navigator {
+    val backStack = rememberNavBackStack<T>(startRoute)
+    return remember(backStack) {
+        Navigator(backStack)
+    }
 }
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> {

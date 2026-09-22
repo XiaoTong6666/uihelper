@@ -22,14 +22,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.xiaotong6666.uihelper.mode.LocalUiMode
+import io.github.xiaotong6666.uihelper.mode.UiMode
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
 
 @Composable
 fun StatusTag(
@@ -38,17 +41,68 @@ fun StatusTag(
     backgroundColor: Color,
     contentColor: Color,
 ) {
+    when (LocalUiMode.current) {
+        UiMode.Material -> MaterialStatusTag(
+            label = label,
+            modifier = modifier,
+            backgroundColor = backgroundColor,
+            contentColor = contentColor,
+        )
+
+        UiMode.Miuix -> MiuixStatusTag(
+            label = label,
+            modifier = modifier,
+            backgroundColor = backgroundColor,
+            contentColor = contentColor,
+        )
+    }
+}
+
+@Composable
+private fun MaterialStatusTag(
+    label: String,
+    modifier: Modifier,
+    backgroundColor: Color,
+    contentColor: Color,
+) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(backgroundColor)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+            .padding(end = 4.dp)
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(4.dp),
+            ),
     ) {
         Text(
             text = label,
+            modifier = Modifier.padding(vertical = 2.dp, horizontal = 4.dp),
+            style = MaterialTheme.typography.labelSmallEmphasized,
             color = contentColor,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+private fun MiuixStatusTag(
+    label: String,
+    modifier: Modifier,
+    backgroundColor: Color,
+    contentColor: Color,
+) {
+    Box(
+        modifier = modifier.background(
+            color = backgroundColor,
+            shape = RoundedCornerShape(6.dp),
+        ),
+    ) {
+        MiuixText(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            text = label,
+            color = contentColor,
+            fontSize = 9.sp,
+            fontWeight = FontWeight(750),
+            maxLines = 1,
+            softWrap = false,
         )
     }
 }

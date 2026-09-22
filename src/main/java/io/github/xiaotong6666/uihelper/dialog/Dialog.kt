@@ -45,7 +45,6 @@ import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.collectLatest
@@ -153,16 +152,16 @@ private class LoadingDialogHandleImpl(
     coroutineScope: CoroutineScope,
 ) : DialogHandleBase(visible, coroutineScope),
     LoadingDialogHandle {
-    override suspend fun <R> withLoading(message: String?, block: suspend () -> R): R = coroutineScope.async {
+    override suspend fun <R> withLoading(message: String?, block: suspend () -> R): R {
         try {
             this@LoadingDialogHandleImpl.message.value = message
             visible.value = true
-            block()
+            return block()
         } finally {
             visible.value = false
             this@LoadingDialogHandleImpl.message.value = null
         }
-    }.await()
+    }
 
     override fun showLoading(message: String?) {
         this.message.value = message
@@ -260,15 +259,6 @@ private class ConfirmDialogHandleImpl(
         }
     }
 
-    private suspend fun awaitResult(): ConfirmResult = suspendCancellableCoroutine { continuation ->
-        awaitContinuation = continuation
-        if (callback.isEmpty) {
-            continuation.invokeOnCancellation {
-                visible.value = false
-            }
-        }
-    }
-
     override fun showConfirm(
         title: String,
         content: String?,
@@ -299,21 +289,32 @@ private class ConfirmDialogHandleImpl(
         html: Boolean,
         confirm: String?,
         dismiss: String?,
-    ): ConfirmResult {
-        coroutineScope.launch {
-            updateVisuals(
-                ConfirmDialogVisuals(
-                    title = title,
-                    content = content,
-                    isMarkdown = markdown,
-                    isHtml = html,
-                    confirm = confirm,
-                    dismiss = dismiss,
-                ),
-            )
-            show()
+    ): ConfirmResult = suspendCancellableCoroutine { continuation ->
+        check(awaitContinuation == null) {
+            "Concurrent awaitConfirm calls are not supported"
         }
-        return awaitResult()
+        awaitContinuation = continuation
+        continuation.invokeOnCancellation {
+            if (awaitContinuation === continuation) {
+                awaitContinuation = null
+                visible.value = false
+            }
+        }
+        coroutineScope.launch {
+            if (continuation.isActive && awaitContinuation === continuation) {
+                updateVisuals(
+                    ConfirmDialogVisuals(
+                        title = title,
+                        content = content,
+                        isMarkdown = markdown,
+                        isHtml = html,
+                        confirm = confirm,
+                        dismiss = dismiss,
+                    ),
+                )
+                show()
+            }
+        }
     }
 
     override fun show() {

@@ -28,6 +28,8 @@ import io.github.xiaotong6666.uihelper.material.primitive.ConfigTextFieldMateria
 import io.github.xiaotong6666.uihelper.material.primitive.ConfigToggleCardMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.DeviceStatusListMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.DualActionRowMaterial
+import io.github.xiaotong6666.uihelper.material.primitive.HomeInfoCardMaterial
+import io.github.xiaotong6666.uihelper.material.primitive.HomeStatusCardMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.InfoBannerMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.InfoPanelMaterial
 import io.github.xiaotong6666.uihelper.material.primitive.InlineTextButtonMaterial
@@ -53,6 +55,8 @@ import io.github.xiaotong6666.uihelper.miuix.primitive.ConfigTextFieldMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.ConfigToggleCardMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.DeviceStatusListMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.DualActionRowMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.HomeInfoCardMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.HomeStatusCardMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.InfoBannerMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.InfoPanelMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.InlineTextButtonMiuix
@@ -75,6 +79,7 @@ import io.github.xiaotong6666.uihelper.miuix.primitive.WarningBannerMiuix
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import io.github.xiaotong6666.uihelper.model.GridActionItem
+import io.github.xiaotong6666.uihelper.model.HomeInfoItem
 import io.github.xiaotong6666.uihelper.model.SectionDescriptionStyle
 import io.github.xiaotong6666.uihelper.model.SectionTitleStyle
 
@@ -311,6 +316,33 @@ fun StatusChip(
     when (LocalUiMode.current) {
         UiMode.Miuix -> StatusChipMiuix(label, value, modifier, supportingText, metaText, supportingMinLines, metaMinLines, emphasized, onClick)
         UiMode.Material -> StatusChipMaterial(label, value, modifier, supportingText, metaText, supportingMinLines, metaMinLines, emphasized, onClick)
+    }
+}
+
+@Composable
+fun HomeStatusCard(
+    title: String,
+    summary: String,
+    footer: String,
+    healthy: Boolean,
+    checking: Boolean = false,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> HomeStatusCardMiuix(title, summary, footer, healthy, checking, modifier, onClick)
+        UiMode.Material -> HomeStatusCardMaterial(title, summary, footer, healthy, modifier, onClick)
+    }
+}
+
+@Composable
+fun HomeInfoCard(
+    items: List<HomeInfoItem>,
+    modifier: Modifier = Modifier,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> HomeInfoCardMiuix(items, modifier)
+        UiMode.Material -> HomeInfoCardMaterial(items, modifier)
     }
 }
 

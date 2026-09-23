@@ -16,11 +16,19 @@
 
 package io.github.xiaotong6666.uihelper.model
 
+import androidx.compose.ui.graphics.vector.ImageVector
+
 data class GridActionItem(
     val label: String,
     val action: () -> Unit,
     val style: GridActionStyle = GridActionStyle.Outlined,
     val isError: Boolean = false,
+)
+
+data class HomeInfoItem(
+    val icon: ImageVector,
+    val title: String,
+    val value: String,
 )
 
 enum class GridActionStyle {

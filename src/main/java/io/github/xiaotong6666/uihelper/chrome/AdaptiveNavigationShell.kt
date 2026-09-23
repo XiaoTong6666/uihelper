@@ -123,6 +123,7 @@ data class NavigationShellItem(
     val title: String,
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
+    val topBarTitle: String = title,
     val action: NavigationShellAction? = null,
 )
 
@@ -290,7 +291,7 @@ fun AdaptiveNavigationShell(
                             val defaultTopBar: ComposableContent = {
                                 if (isTopBarScrollable) {
                                     top.yukonga.miuix.kmp.basic.TopAppBar(
-                                        title = activeItem.title,
+                                        title = activeItem.topBarTitle,
                                         color = miuixChromeColor(blurActive),
                                         titleColor = MiuixTheme.colorScheme.onSurface,
                                         actions = {
@@ -310,7 +311,7 @@ fun AdaptiveNavigationShell(
                                     )
                                 } else {
                                     top.yukonga.miuix.kmp.basic.SmallTopAppBar(
-                                        title = activeItem.title,
+                                        title = activeItem.topBarTitle,
                                         color = miuixChromeColor(blurActive),
                                         actions = {
                                             activeItem.action?.let { item ->
@@ -492,7 +493,7 @@ fun AdaptiveNavigationShell(
                 topBar = chromeSpec.materialTopBar ?: {
                     if (isTopBarScrollable) {
                         LargeFlexibleTopAppBar(
-                            title = { Text(text = activeItem.title) },
+                            title = { Text(text = activeItem.topBarTitle) },
                             actions = {
                                 activeItem.action?.let { item ->
                                     IconButton(
@@ -512,7 +513,7 @@ fun AdaptiveNavigationShell(
                         )
                     } else {
                         TopAppBar(
-                            title = { Text(text = activeItem.title) },
+                            title = { Text(text = activeItem.topBarTitle) },
                             actions = {
                                 activeItem.action?.let { item ->
                                     IconButton(

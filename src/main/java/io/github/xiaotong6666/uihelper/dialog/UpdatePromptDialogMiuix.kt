@@ -75,6 +75,7 @@ fun UpdatePromptDialogMiuix(
     moreChangesLabel: String? = null,
     viewAllLabel: String? = null,
     onViewAll: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     WindowDialog(
         show = show,
@@ -82,6 +83,7 @@ fun UpdatePromptDialogMiuix(
         title = title,
         summary = summary,
         onDismissRequest = onDismiss,
+        onDismissFinished = onDismissFinished,
     ) {
         Layout(content = {
             Column(

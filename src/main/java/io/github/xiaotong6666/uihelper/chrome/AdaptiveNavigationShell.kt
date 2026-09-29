@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -76,6 +77,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.style.TextOverflow
@@ -104,6 +106,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults as MiuixTopAppBarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
@@ -155,6 +158,9 @@ enum class NavigationShellTopBarMode {
 
 /** Controls which tab, if any, handles Back. Disabled lets the parent route host handle it. */
 enum class NavigationShellBackBehavior { FirstPage, PreviousPage, Disabled }
+
+/** A stable one-line native measurement slot; app-owned expanded titles are rendered on top. */
+private const val StableLargeTitleMeasureText = "\u00A0"
 
 private class NavigationShellPagerState(
     val pagerState: PagerState,
@@ -347,10 +353,17 @@ fun AdaptiveNavigationShell(
                                     Box(Modifier.fillMaxWidth().wrapContentHeight().clipToBounds()) {
                                         top.yukonga.miuix.kmp.basic.TopAppBar(
                                             title = activeItem.compactTopBarTitle,
-                                            largeTitle = activeItem.topBarTitle,
+                                            // The native bar measures its large title to compute heightOffsetLimit.
+                                            // All tabs must have the same one-line measure or switching from a
+                                            // wrapped title to a short one changes the shared collapse geometry.
+                                            // The actual title (and optional glyph) is drawn in the overlay below.
+                                            largeTitle = StableLargeTitleMeasureText,
                                             color = miuixChromeColor(blurActive),
                                             titleColor = MiuixTheme.colorScheme.onSurface,
-                                            titlePadding = MiuixTopAppBarDefaults.TitlePadding + if (largeLeading != null) 40.dp else 0.dp,
+                                            // MIUIX applies this *on both sides* to the compact title as well.
+                                            // Reserving the expanded glyph here incorrectly ellipsizes a title
+                                            // that would fit between the navigation and action icons.
+                                            titlePadding = MiuixTopAppBarDefaults.TitlePadding,
                                             navigationIcon = {
                                                 Box(
                                                     modifier = if (largeLeading != null) Modifier.graphicsLayer {
@@ -373,22 +386,33 @@ fun AdaptiveNavigationShell(
                                             },
                                             scrollBehavior = miuixScrollBehavior,
                                         )
-                                        if (largeLeading != null) {
-                                            // Native MIUIX accepts a String as its large title.
-                                            // Reserve a prefix in that same title row and track its
-                                            // native collapse offset; this slot never replaces the bar.
-                                            Box(
-                                                modifier = Modifier
-                                                    .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
-                                                    .padding(
-                                                        start = MiuixTopAppBarDefaults.TitlePadding,
-                                                        top = MiuixTopAppBarDefaults.CollapsedHeight + 3.dp,
-                                                    )
-                                                    .offset { IntOffset(0, miuixScrollBehavior.state.heightOffset.roundToInt()) }
-                                                    .graphicsLayer {
-                                                        alpha = (1f - miuixScrollBehavior.state.collapsedFraction * 3f).coerceIn(0f, 1f)
-                                                    },
-                                            ) { largeLeading() }
+                                        // A single-line, asymmetrically spaced expanded title: only the
+                                        // leading glyph uses width; the right-hand text area remains available.
+                                        // This also keeps native heightOffsetLimit identical across tab titles.
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
+                                                .padding(top = MiuixTopAppBarDefaults.CollapsedHeight)
+                                                .offset { IntOffset(0, miuixScrollBehavior.state.heightOffset.roundToInt()) }
+                                                .graphicsLayer {
+                                                    alpha = (1f - miuixScrollBehavior.state.collapsedFraction * 3f).coerceIn(0f, 1f)
+                                                }
+                                                .padding(horizontal = MiuixTopAppBarDefaults.TitlePadding),
+                                            horizontalArrangement = Arrangement.spacedBy(if (largeLeading != null) 10.dp else 0.dp),
+                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                        ) {
+                                            largeLeading?.invoke()
+                                            MiuixText(
+                                                text = activeItem.topBarTitle,
+                                                modifier = Modifier.weight(1f, fill = false),
+                                                color = MiuixTheme.colorScheme.onSurface,
+                                                fontSize = MiuixTheme.textStyles.title1.fontSize,
+                                                fontWeight = FontWeight.Normal,
+                                                maxLines = 1,
+                                                softWrap = false,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
                                         }
                                     }
                                 } else {
@@ -530,18 +554,43 @@ fun AdaptiveNavigationShell(
                                 if (!contentReady && page != settledPage) {
                                     return@HorizontalPager
                                 }
+                                val pageConnection = remember(page, pagerState, miuixScrollBehavior, items.size) {
+                                    ActivePageNestedScrollConnection(miuixScrollBehavior.nestedScrollConnection) {
+                                        isActivePageScrollOwner(
+                                            page = page,
+                                            visiblePage = visiblePagerPage(
+                                                currentPage = pagerState.currentPage,
+                                                currentPageOffsetFraction = pagerState.currentPageOffsetFraction,
+                                                settledPage = pagerState.settledPage,
+                                                isScrollInProgress = pagerState.isScrollInProgress,
+                                                pageCount = items.size,
+                                            ),
+                                            isPagerScrolling = pagerState.isScrollInProgress,
+                                        )
+                                    }
+                                }
+                                val pageHost = remember(pageConnection, isTopBarScrollable) {
+                                    if (isTopBarScrollable) PageHostHandle(
+                                        nestedScrollConnection = pageConnection,
+                                        collapsedFractionProvider = { miuixScrollBehavior.state.collapsedFraction },
+                                    ) else PageHostHandle(collapsedFractionProvider = { 1f })
+                                }
                                 val pageModifier = if (chromeSpec.consumeOuterScroll || !isTopBarScrollable) {
                                     Modifier
                                 } else {
-                                    Modifier.nestedScroll(miuixScrollBehavior.nestedScrollConnection)
+                                    Modifier.nestedScroll(pageConnection)
                                 }
-
-                                content(
-                                    page,
-                                    paddingValues,
-                                    page == activePageIndex,
-                                    pageModifier,
-                                )
+                                CompositionLocalProvider(
+                                    LocalMiuixNestedScrollConnection provides pageConnection.takeIf { isTopBarScrollable },
+                                    LocalPageHostHandle provides pageHost,
+                                ) {
+                                    content(
+                                        page,
+                                        paddingValues,
+                                        page == activePageIndex,
+                                        pageModifier,
+                                    )
+                                }
                             }
                             chromeSpec.overlayContent?.invoke(paddingValues)
                         }

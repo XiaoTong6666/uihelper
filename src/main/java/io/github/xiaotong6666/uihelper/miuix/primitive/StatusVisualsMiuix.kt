@@ -42,6 +42,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 /** Short status text using the native MIUIX badge, not a Material chip painted with MIUIX colors. */
 @Composable
@@ -74,6 +75,7 @@ fun StatusHeroCardMiuix(
     containerColor: Color,
     accentColor: Color,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -81,6 +83,10 @@ fun StatusHeroCardMiuix(
             color = containerColor,
             contentColor = MiuixTheme.colorScheme.onSurface,
         ),
+        // Match FuseHide HomeStatusCard: the native TiltFeedback rotates toward the
+        // touch position and springs back. Passive status cards have no press feedback.
+        onClick = onClick,
+        pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
         insideMargin = PaddingValues(0.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth().heightIn(min = 136.dp).squircleClip(16.dp)) {

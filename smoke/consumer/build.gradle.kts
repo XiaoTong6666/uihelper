@@ -3,6 +3,16 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.4.20"
 }
+
+// The smoke consumer is a separate Gradle build. Read the version from the uihelper
+// checkout above its root, matching the library's own Maven publication version.
+val uihelperVersion = providers.gradleProperty("uihelper.version").orElse(
+    providers.exec {
+        workingDir = rootProject.projectDir.parentFile
+        commandLine("git", "rev-list", "--count", "HEAD")
+    }.standardOutput.asText.map { it.trim() },
+)
+
 android {
     namespace = "test.consumer"
     compileSdk = 37
@@ -19,6 +29,5 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3:1.5.0-alpha29")
-    // Keep this coordinate aligned with the commit-count version of this checkout.
-    implementation("io.github.xiaotong6666:uihelper:38")
+    implementation("io.github.xiaotong6666:uihelper:${uihelperVersion.get()}")
 }

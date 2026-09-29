@@ -8,8 +8,10 @@ From the uihelper root:
 
     ./gradlew -p smoke :consumer:compileDebugKotlin
 
-For a binary AAR test, publish with a unique local version and use that version
-in smoke/consumer/build.gradle.kts; remove the includeBuild line and
-add mavenLocal() to the smoke settings repositories. A fresh online resolution
-may be needed for a new Maven publication; an uncached BOM POM cannot be
-resolved with --offline on first use.
+The dependency coordinate automatically uses `git rev-list --count HEAD` from
+the parent uihelper checkout. For a binary AAR test, publish with a unique
+local version, remove the includeBuild line, add mavenLocal() to the smoke
+settings repositories, and pass the same `-Puihelper.version=...` to the
+consumer build. No editing of its build.gradle.kts is necessary. A fresh
+online resolution may be needed for a new Maven publication; an uncached BOM
+POM cannot be resolved with --offline on first use.

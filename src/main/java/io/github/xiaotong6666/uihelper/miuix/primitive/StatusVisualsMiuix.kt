@@ -108,15 +108,17 @@ fun StatusHeroCardMiuix(
                     )
                     .squircleClip(16.dp),
             ) {
+                // KSU HomeMiuix StatusCard deliberately pushes its decorative signal
+                // past the bottom/right of the clipped card. A larger structured glyph
+                // follows that treatment, but keeps a little more of its lower interior
+                // visible (e.g. the dot in ErrorOutline must not be cropped).
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    // Structured heroes anchor their signal to the bottom of the *whole*
-                    // card; it no longer floats above the metadata and action row.
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .offset(x = 18.dp, y = if (structured) 18.dp else 25.dp)
-                        .size(112.dp),
+                        .offset(x = if (structured) 36.dp else 18.dp, y = if (structured) 27.dp else 25.dp)
+                        .size(if (structured) 148.dp else 112.dp),
                     tint = accentColor.copy(alpha = 0.65f),
                 )
                 Column(

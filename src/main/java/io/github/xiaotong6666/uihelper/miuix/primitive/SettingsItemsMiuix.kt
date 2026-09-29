@@ -174,6 +174,9 @@ private fun SettingsItemSurfaceMiuix(onClick: (() -> Unit)? = null, content: @Co
         Card(
             modifier = Modifier.fillMaxWidth(),
             onClick = onClick,
+            // Card disables indication by default; settings rows use the MIUIX pressed
+            // highlight supplied by MiuixTheme, not an M3 ripple or Sink scale.
+            showIndication = true,
             colors = CardDefaults.defaultColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.onSurface),
             insideMargin = PaddingValues(0.dp),
         ) { Column(modifier = Modifier.fillMaxWidth()) { content() } }

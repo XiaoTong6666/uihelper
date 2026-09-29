@@ -156,7 +156,8 @@ fun HomeStatusCardMiuix(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = containerColor),
             onClick = onClick,
-            pressFeedbackType = PressFeedbackType.Tilt,
+            pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
+            showIndication = onClick != null,
             insideMargin = PaddingValues(0.dp),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {

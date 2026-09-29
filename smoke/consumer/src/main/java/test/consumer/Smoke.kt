@@ -15,6 +15,7 @@ import io.github.xiaotong6666.uihelper.chrome.AdaptiveNavigationShell
 import io.github.xiaotong6666.uihelper.chrome.NavigationShellBackBehavior
 import io.github.xiaotong6666.uihelper.chrome.NavigationShellItem
 import io.github.xiaotong6666.uihelper.common.StatusTag
+import io.github.xiaotong6666.uihelper.miuix.primitive.StatusHeroCardMiuix
 import io.github.xiaotong6666.uihelper.mode.AdaptiveTheme
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import io.github.xiaotong6666.uihelper.navigation3.rememberNavigator
@@ -53,6 +54,15 @@ fun ReusableConsumer() {
                 Button(onClick = expanded::toggle) { Text("Toggle details") }
                 Button(onClick = { routes.pushSingleTop(DemoRoute.Details) }) { Text("Open details") }
                 ExpandableSectionBody(expanded = expanded.expanded) { Text("More") }
+                StatusHeroCardMiuix(
+                    title = "Status",
+                    summary = "Consumer-provided summary",
+                    icon = Icons.Rounded.Home,
+                    containerColor = Color.DarkGray,
+                    accentColor = Color.LightGray,
+                    onClick = {},
+                    footer = { Text("Consumer-owned footer") },
+                )
             }
         }
     }

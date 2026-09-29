@@ -21,6 +21,7 @@ package io.github.xiaotong6666.uihelper.miuix.primitive
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -76,6 +77,7 @@ fun StatusHeroCardMiuix(
     accentColor: Color,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    footer: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -87,34 +89,42 @@ fun StatusHeroCardMiuix(
         // touch position and springs back. Passive status cards have no press feedback.
         onClick = onClick,
         pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
+        // MIUIX Card defaults showIndication to false. Tilt alone changes geometry,
+        // but does not draw the pressed highlight expected on an actionable card.
+        showIndication = onClick != null,
         insideMargin = PaddingValues(0.dp),
     ) {
-        Box(modifier = Modifier.fillMaxWidth().heightIn(min = 136.dp).squircleClip(16.dp)) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.BottomEnd).offset(x = 18.dp, y = 25.dp).size(112.dp),
-                tint = accentColor.copy(alpha = 0.65f),
-            )
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, top = 20.dp, end = 94.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = title,
-                    style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.SemiBold),
-                    color = MiuixTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.fillMaxWidth().heightIn(min = if (footer == null) 136.dp else 108.dp).squircleClip(16.dp)) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.BottomEnd).offset(x = 18.dp, y = 25.dp).size(112.dp),
+                    tint = accentColor.copy(alpha = 0.65f),
                 )
-                Text(
-                    text = summary,
-                    style = MiuixTheme.textStyles.body2,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(start = 20.dp, top = 20.dp, end = 94.dp, bottom = if (footer == null) 24.dp else 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = title,
+                        style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.SemiBold),
+                        color = MiuixTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = summary,
+                        style = MiuixTheme.textStyles.body2,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
+            // Keep supplementary information below the decorative glyph rather than
+            // forcing it into the narrow title column. This slot is app-agnostic.
+            if (footer != null) Column(modifier = Modifier.fillMaxWidth(), content = footer)
         }
     }
 }

@@ -21,11 +21,17 @@ package io.github.xiaotong6666.uihelper.chrome
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -66,8 +72,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -94,6 +103,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBarDefaults as MiuixTopAppBarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -105,6 +115,7 @@ import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
+import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar as MiuixFloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem as MiuixFloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationBar as MiuixNavigationBar
@@ -126,6 +137,14 @@ data class NavigationShellItem(
     val selectedIcon: ImageVector = icon,
     val topBarTitle: String = title,
     val action: NavigationShellAction? = null,
+    /** Optional short MIUIX collapsed title; expanded and Material titles stay [topBarTitle]. */
+    val compactTopBarTitle: String = topBarTitle,
+    /** Optional app-owned leading content in the native top bar (e.g. a brand glyph). */
+    val leadingContent: (@Composable () -> Unit)? = null,
+    /** Optional glyph next to expanded MIUIX title; pair with [leadingContent] for collapsed state. */
+    val largeTitleLeadingContent: (@Composable () -> Unit)? = null,
+    /** Optional app-owned action(s). Overrides [action] when supplied. */
+    val trailingContent: (@Composable RowScope.() -> Unit)? = null,
 )
 
 enum class NavigationShellTopBarMode {
@@ -305,31 +324,63 @@ fun AdaptiveNavigationShell(
                         MiuixBlurredChrome(backdrop = blurBackdrop) {
                             val defaultTopBar: ComposableContent = {
                                 if (isTopBarScrollable) {
-                                    top.yukonga.miuix.kmp.basic.TopAppBar(
-                                        title = activeItem.topBarTitle,
-                                        color = miuixChromeColor(blurActive),
-                                        titleColor = MiuixTheme.colorScheme.onSurface,
-                                        actions = {
-                                            activeItem.action?.let { item ->
-                                                top.yukonga.miuix.kmp.basic.IconButton(
-                                                    onClick = item.onClick,
-                                                ) {
-                                                    Icon(
-                                                        imageVector = item.icon,
-                                                        contentDescription = item.contentDescription,
-                                                        tint = MiuixTheme.colorScheme.onSurface,
-                                                    )
+                                    val largeLeading = activeItem.largeTitleLeadingContent
+                                    Box(Modifier.fillMaxWidth().wrapContentHeight().clipToBounds()) {
+                                        top.yukonga.miuix.kmp.basic.TopAppBar(
+                                            title = activeItem.compactTopBarTitle,
+                                            largeTitle = activeItem.topBarTitle,
+                                            color = miuixChromeColor(blurActive),
+                                            titleColor = MiuixTheme.colorScheme.onSurface,
+                                            titlePadding = MiuixTopAppBarDefaults.TitlePadding + if (largeLeading != null) 40.dp else 0.dp,
+                                            navigationIcon = {
+                                                Box(
+                                                    modifier = if (largeLeading != null) Modifier.graphicsLayer {
+                                                        alpha = (miuixScrollBehavior.state.collapsedFraction * 3f).coerceIn(0f, 1f)
+                                                    } else Modifier,
+                                                ) { activeItem.leadingContent?.invoke() }
+                                            },
+                                            actions = {
+                                                if (activeItem.trailingContent != null) {
+                                                    activeItem.trailingContent.invoke(this)
+                                                } else activeItem.action?.let { item ->
+                                                    top.yukonga.miuix.kmp.basic.IconButton(onClick = item.onClick) {
+                                                        Icon(
+                                                            imageVector = item.icon,
+                                                            contentDescription = item.contentDescription,
+                                                            tint = MiuixTheme.colorScheme.onSurface,
+                                                        )
+                                                    }
                                                 }
-                                            }
-                                        },
-                                        scrollBehavior = miuixScrollBehavior,
-                                    )
+                                            },
+                                            scrollBehavior = miuixScrollBehavior,
+                                        )
+                                        if (largeLeading != null) {
+                                            // Native MIUIX accepts a String as its large title.
+                                            // Reserve a prefix in that same title row and track its
+                                            // native collapse offset; this slot never replaces the bar.
+                                            Box(
+                                                modifier = Modifier
+                                                    .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
+                                                    .padding(
+                                                        start = MiuixTopAppBarDefaults.TitlePadding,
+                                                        top = MiuixTopAppBarDefaults.CollapsedHeight + 3.dp,
+                                                    )
+                                                    .offset { IntOffset(0, miuixScrollBehavior.state.heightOffset.roundToInt()) }
+                                                    .graphicsLayer {
+                                                        alpha = (1f - miuixScrollBehavior.state.collapsedFraction * 3f).coerceIn(0f, 1f)
+                                                    },
+                                            ) { largeLeading() }
+                                        }
+                                    }
                                 } else {
                                     top.yukonga.miuix.kmp.basic.SmallTopAppBar(
                                         title = activeItem.topBarTitle,
                                         color = miuixChromeColor(blurActive),
+                                        navigationIcon = { activeItem.leadingContent?.invoke() },
                                         actions = {
-                                            activeItem.action?.let { item ->
+                                            if (activeItem.trailingContent != null) {
+                                                activeItem.trailingContent.invoke(this)
+                                            } else activeItem.action?.let { item ->
                                                 top.yukonga.miuix.kmp.basic.IconButton(
                                                     onClick = item.onClick,
                                                 ) {
@@ -509,8 +560,11 @@ fun AdaptiveNavigationShell(
                     if (isTopBarScrollable) {
                         LargeFlexibleTopAppBar(
                             title = { Text(text = activeItem.topBarTitle) },
+                            navigationIcon = { activeItem.leadingContent?.invoke() },
                             actions = {
-                                activeItem.action?.let { item ->
+                                if (activeItem.trailingContent != null) {
+                                    activeItem.trailingContent.invoke(this)
+                                } else activeItem.action?.let { item ->
                                     IconButton(
                                         onClick = item.onClick,
                                         colors = materialChromeIconButtonColors(),
@@ -529,8 +583,11 @@ fun AdaptiveNavigationShell(
                     } else {
                         TopAppBar(
                             title = { Text(text = activeItem.topBarTitle) },
+                            navigationIcon = { activeItem.leadingContent?.invoke() },
                             actions = {
-                                activeItem.action?.let { item ->
+                                if (activeItem.trailingContent != null) {
+                                    activeItem.trailingContent.invoke(this)
+                                } else activeItem.action?.let { item ->
                                     IconButton(
                                         onClick = item.onClick,
                                         colors = materialChromeIconButtonColors(),

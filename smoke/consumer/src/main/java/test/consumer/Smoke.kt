@@ -36,7 +36,16 @@ fun ReusableConsumer() {
     AdaptiveTheme(uiMode = UiMode.Material, darkTheme = false, materialColorScheme = lightColorScheme()) {
         val expanded = rememberExpandableSectionState(identity = "stable-section")
         AdaptiveNavigationShell(
-            items = listOf(NavigationShellItem("Home", Icons.Rounded.Home)),
+            items = listOf(
+                NavigationShellItem(
+                    title = "Home",
+                    icon = Icons.Rounded.Home,
+                    compactTopBarTitle = "Home",
+                    leadingContent = { Text("L") },
+                    largeTitleLeadingContent = { Text("Brand") },
+                    trailingContent = { Text("Action") },
+                ),
+            ),
             selectedIndex = 0,
             onSelectedIndexChange = {},
             navigationRail = false,

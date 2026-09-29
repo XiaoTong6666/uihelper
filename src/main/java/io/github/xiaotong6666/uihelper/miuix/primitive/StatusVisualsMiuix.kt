@@ -1,0 +1,114 @@
+/*
+ * Copyright (C) 2026 XiaoTong6666
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@file:Suppress("ktlint:standard:function-naming")
+
+package io.github.xiaotong6666.uihelper.miuix.primitive
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.squircle.squircleClip
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+/** Short status text using the native MIUIX badge, not a Material chip painted with MIUIX colors. */
+@Composable
+fun StatusLabelBadgeMiuix(
+    label: String,
+    containerColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Badge(
+        modifier = modifier.heightIn(min = 24.dp),
+        containerColor = containerColor,
+        contentColor = contentColor,
+    ) {
+        Text(
+            text = label,
+            style = MiuixTheme.textStyles.footnote1.copy(fontWeight = FontWeight.Medium),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** A status-first MIUIX hero: a large decorative signal anchored to the lower-right corner. */
+@Composable
+fun StatusHeroCardMiuix(
+    title: String,
+    summary: String,
+    icon: ImageVector,
+    containerColor: Color,
+    accentColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.defaultColors(
+            color = containerColor,
+            contentColor = MiuixTheme.colorScheme.onSurface,
+        ),
+        insideMargin = PaddingValues(0.dp),
+    ) {
+        Box(modifier = Modifier.fillMaxWidth().heightIn(min = 136.dp).squircleClip(16.dp)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.BottomEnd).offset(x = 18.dp, y = 25.dp).size(112.dp),
+                tint = accentColor.copy(alpha = 0.65f),
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, top = 20.dp, end = 94.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.SemiBold),
+                    color = MiuixTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = summary,
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}

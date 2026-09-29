@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:tools="http://schemas.android.com/tools">
+    <!-- The MIUIX blur artifact declares API 33. Its shader path is gated in
+         uihelper/miuix/effect/Blur.kt and an opaque surface is used below 33. -->
+    <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
+</manifest>

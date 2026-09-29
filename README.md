@@ -12,7 +12,15 @@ This module is intended to be extractable and reusable in other projects.
 
 ## Reuse
 
-`uihelper` is a standalone Android library project. It requires `compileSdk 37`, `minSdk 31`, Java 17, and the Kotlin Compose compiler plugin.
+`uihelper` is a standalone Android library project. It requires `compileSdk 37`, `minSdk 29`, Java/JVM 17 bytecode, and the Kotlin Compose compiler plugin. A JDK 21 build runtime is fine; the consumer does not have to match it. Its `rememberNavigator` uses a JVM-17-safe saver equivalent to MIUIX Nav's, because MIUIX Nav 0.9.4's own `rememberNavBackStack` is an inline JVM-21 API. This retains back-stack save/restore and allows JVM-17 consumers to call the public inline helper.
+
+### MIUIX blur on API 29–32
+
+The upstream `miuix-blur-android` 0.9.4 AAR declares `minSdk 33` even though the rest of the MIUIX UI used here supports older Android versions. `uihelper` includes a scoped `tools:overrideLibrary` for that artifact in its own manifest, so consumers can retain `minSdk 29` without adding a second manifest override.
+
+Actual backdrop blur is **only enabled when MIUIX RuntimeShader is supported** (Android 13 / API 33 or later). API 29–32 retain their MIUIX surfaces, navigation, cards and animations, but use opaque chrome rather than a transparent bar without a rendered blur. Keep the capability check in `miuix/effect/Blur.kt` in sync with the MIUIX blur implementation when upgrading the dependency. This manifest override is specific to the guarded MIUIX 0.9.4 blur integration, not a general permission to run arbitrary newer-API libraries on older devices.
+
+JVM-17 consumers can also use this library's reified `rememberNavigator` helper; do not call upstream MIUIX Nav's JVM-21 inline helper directly from a JVM-17 module. In projects with strict module dependency boundaries, consume the published AAR from a UI module (or classify the included module explicitly); do not add this UI dependency to a headless SDK module.
 
 For active development, add this repository as a Git submodule or sibling directory, then include the module in the consumer's `settings.gradle.kts`:
 

@@ -29,7 +29,7 @@ import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
+import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 val LocalMiuixBlurActive = staticCompositionLocalOf { false }
@@ -38,7 +38,9 @@ val LocalMiuixBlurBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 
 @Composable
 fun rememberMiuixBlurBackdrop(enabled: Boolean): LayerBackdrop? {
-    if (!enabled || !isRenderEffectSupported()) return null
+    // RenderEffect exists on API 31, but MIUIX's backdrop pipeline also needs
+    // RuntimeShader (API 33). Never make chrome transparent without that effect.
+    if (!enabled || !isRuntimeShaderSupported()) return null
     val surface = MiuixTheme.colorScheme.surface
     return rememberLayerBackdrop {
         drawRect(surface)

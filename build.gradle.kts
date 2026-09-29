@@ -34,16 +34,16 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        minSdk = 31
+        minSdk = 29
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
             freeCompilerArgs.addAll(
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
@@ -97,7 +97,11 @@ dependencies {
     implementation(libs.miuix.ui)
     implementation(libs.miuix.blur)
     implementation(libs.miuix.preference)
-    implementation(libs.miuix.nav)
+    // NavKey/NavBackStack and the public inline Saver contract cross the AAR API boundary.
+    api(libs.miuix.nav)
+    // Root builds (e.g. FuseHide) use their own version catalog, not this
+    // standalone project's libs. Keep this public inline dependency explicit.
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

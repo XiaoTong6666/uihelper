@@ -331,7 +331,7 @@ fun HomeStatusCard(
 ) {
     when (LocalUiMode.current) {
         UiMode.Miuix -> HomeStatusCardMiuix(title, summary, footer, healthy, checking, modifier, onClick)
-        UiMode.Material -> HomeStatusCardMaterial(title, summary, footer, healthy, modifier, onClick)
+        UiMode.Material -> HomeStatusCardMaterial(title, summary, footer, healthy, checking, modifier, onClick)
     }
 }
 

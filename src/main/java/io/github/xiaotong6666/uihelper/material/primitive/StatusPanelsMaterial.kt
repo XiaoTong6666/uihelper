@@ -99,15 +99,16 @@ fun HomeStatusCardMaterial(
     summary: String,
     footer: String,
     healthy: Boolean,
+    checking: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    val containerColor = if (healthy) {
+    val containerColor = if (checking) MaterialTheme.colorScheme.surfaceBright else if (healthy) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
         MaterialTheme.colorScheme.errorContainer
     }
-    val contentColor = if (healthy) {
+    val contentColor = if (checking) MaterialTheme.colorScheme.onSurface else if (healthy) {
         MaterialTheme.colorScheme.onSecondaryContainer
     } else {
         MaterialTheme.colorScheme.onErrorContainer
@@ -135,7 +136,9 @@ fun HomeStatusCardMaterial(
                     } else {
                         Icons.Rounded.ErrorOutline
                     },
-                    tint = if (healthy) {
+                    tint = if (checking) {
+                        androidx.compose.ui.graphics.Color.Transparent
+                    } else if (healthy) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     } else {
                         MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
@@ -243,7 +246,7 @@ private fun StatusChipMaterialContent(
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         Text(
-            text = label.uppercase(Locale.US),
+            text = label.uppercase(Locale.getDefault()),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = if (emphasized) contentColor.copy(alpha = 0.78f) else MaterialTheme.colorScheme.primary,
             maxLines = 1,
@@ -312,7 +315,7 @@ fun MetricCardMaterial(
             verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             Text(
-                text = label.uppercase(Locale.US),
+                text = label.uppercase(Locale.getDefault()),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,

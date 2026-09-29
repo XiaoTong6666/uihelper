@@ -69,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -131,6 +132,9 @@ enum class NavigationShellTopBarMode {
     Scrollable,
     Collapsed,
 }
+
+/** Controls which tab, if any, handles Back. Disabled lets the parent route host handle it. */
+enum class NavigationShellBackBehavior { FirstPage, PreviousPage, Disabled }
 
 private class NavigationShellPagerState(
     val pagerState: PagerState,
@@ -204,14 +208,18 @@ fun AdaptiveNavigationShell(
     topBarMode: NavigationShellTopBarMode = NavigationShellTopBarMode.Scrollable,
     enableMiuixBlur: Boolean = false,
     enableMiuixFloatingBottomBar: Boolean = false,
+    navigationRail: Boolean? = null,
+    swipeNavigationEnabled: Boolean = true,
+    backBehavior: NavigationShellBackBehavior = NavigationShellBackBehavior.FirstPage,
+    onBackRequested: ((currentPage: Int) -> Unit)? = null,
     content: @Composable (pageIndex: Int, contentPadding: PaddingValues, isCurrentPage: Boolean, pageModifier: Modifier) -> Unit,
 ) {
     if (items.isEmpty()) return
 
     val coercedSelectedIndex = selectedIndex.coerceIn(0, items.lastIndex)
-    val useNavigationRail = shouldShowSplitPane()
+    val useNavigationRail = navigationRail ?: shouldShowSplitPane()
     val pagerMode = PagerInterceptionMode.CrossAxisInterceptor
-    val interceptPagerGestures = pagerMode == PagerInterceptionMode.CrossAxisInterceptor
+    val interceptPagerGestures = swipeNavigationEnabled && pagerMode == PagerInterceptionMode.CrossAxisInterceptor
     val pagerState = rememberPagerState(initialPage = coercedSelectedIndex, pageCount = { items.size })
     val shellPagerState = rememberNavigationShellPagerState(
         pagerState = pagerState,
@@ -263,8 +271,15 @@ fun AdaptiveNavigationShell(
     val navigationEventState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(
         state = navigationEventState,
-        isBackEnabled = activePageIndex != 0,
-        onBackCompleted = { onPageSelected(0) },
+        isBackEnabled = activePageIndex != 0 && (backBehavior != NavigationShellBackBehavior.Disabled || onBackRequested != null),
+        onBackCompleted = {
+            if (onBackRequested != null) onBackRequested(activePageIndex)
+            else when (backBehavior) {
+                NavigationShellBackBehavior.FirstPage -> onPageSelected(0)
+                NavigationShellBackBehavior.PreviousPage -> onPageSelected(activePageIndex - 1)
+                NavigationShellBackBehavior.Disabled -> Unit
+            }
+        },
     )
 
     when (LocalUiMode.current) {
@@ -410,8 +425,8 @@ fun AdaptiveNavigationShell(
                                 modifier = Modifier.fillMaxHeight(),
                                 state = railState,
                                 color = MiuixTheme.colorScheme.surface,
-                                expandContentDescription = "Expand navigation",
-                                collapseContentDescription = "Collapse navigation",
+                                expandContentDescription = stringResource(io.github.xiaotong6666.uihelper.R.string.uihelper_expand_navigation),
+                                collapseContentDescription = stringResource(io.github.xiaotong6666.uihelper.R.string.uihelper_collapse_navigation),
                             ) {
                                 items.forEachIndexed { index, item ->
                                     MiuixNavigationRailItem(
@@ -431,11 +446,11 @@ fun AdaptiveNavigationShell(
                                     .pagerGestureOverride(
                                         pagerState = pagerState,
                                         mode = pagerMode,
-                                        enabled = true,
+                                        enabled = swipeNavigationEnabled,
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = !interceptPagerGestures,
+                                userScrollEnabled = swipeNavigationEnabled && !interceptPagerGestures,
                                 pageNestedScrollConnection = PagerGestureNestedScrollConnection,
                                 flingBehavior = flingBehavior(
                                     state = pagerState,
@@ -652,11 +667,11 @@ fun AdaptiveNavigationShell(
                                     .pagerGestureOverride(
                                         pagerState = pagerState,
                                         mode = pagerMode,
-                                        enabled = true,
+                                        enabled = swipeNavigationEnabled,
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = !interceptPagerGestures,
+                                userScrollEnabled = swipeNavigationEnabled && !interceptPagerGestures,
                                 pageNestedScrollConnection = PagerGestureNestedScrollConnection,
                                 flingBehavior = flingBehavior(
                                     state = pagerState,

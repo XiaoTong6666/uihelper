@@ -19,6 +19,7 @@
 package io.github.xiaotong6666.uihelper.mode
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -33,18 +34,20 @@ import top.yukonga.miuix.kmp.theme.ThemeController
 fun AdaptiveTheme(
     uiMode: UiMode,
     darkTheme: Boolean,
+    materialColorScheme: ColorScheme? = null,
+    themeController: ThemeController? = null,
     content: @Composable () -> Unit,
 ) {
     val colorSchemeMode = remember(darkTheme) {
         if (darkTheme) ColorSchemeMode.Dark else ColorSchemeMode.Light
     }
-    val miuixController = remember(colorSchemeMode) {
+    val defaultMiuixController = remember(colorSchemeMode) {
         ThemeController(colorSchemeMode = colorSchemeMode)
     }
 
     CompositionLocalProvider(LocalUiMode provides uiMode) {
-        MaterialTheme(colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()) {
-            MiuixTheme(controller = miuixController) {
+        MaterialTheme(colorScheme = materialColorScheme ?: if (darkTheme) darkColorScheme() else lightColorScheme()) {
+            MiuixTheme(controller = themeController ?: defaultMiuixController) {
                 CompositionLocalProvider(
                     LocalContentColor provides MiuixTheme.colorScheme.onBackground,
                     content = content,

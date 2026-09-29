@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">展开导航</string>
+    <string name="uihelper_collapse_navigation">收起导航</string>
+    <string name="uihelper_pull_refresh">下拉刷新</string>
+    <string name="uihelper_release_refresh">释放刷新</string>
+    <string name="uihelper_refreshing">正在刷新</string>
+    <string name="uihelper_refresh_complete">刷新完成</string>
+</resources>

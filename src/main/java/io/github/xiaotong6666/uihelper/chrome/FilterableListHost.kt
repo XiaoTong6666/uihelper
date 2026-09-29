@@ -78,6 +78,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -354,10 +355,10 @@ private fun MiuixFilterableListHost(
     val layoutDirection = LocalLayoutDirection.current
     val blurBackdrop = LocalMiuixBlurBackdrop.current
     val resolvedRefreshTexts = refreshTexts?.asList() ?: listOf(
-        "Pull to refresh",
-        "Release to refresh",
-        "Refreshing",
-        "Refresh complete",
+        stringResource(io.github.xiaotong6666.uihelper.R.string.uihelper_pull_refresh),
+        stringResource(io.github.xiaotong6666.uihelper.R.string.uihelper_release_refresh),
+        stringResource(io.github.xiaotong6666.uihelper.R.string.uihelper_refreshing),
+        stringResource(io.github.xiaotong6666.uihelper.R.string.uihelper_refresh_complete),
     )
 
     PageHost(

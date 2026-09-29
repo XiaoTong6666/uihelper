@@ -8,6 +8,9 @@
 /.idea/workspace.xml
 .DS_Store
 /build
+/smoke/.gradle/
+/smoke/build/
+/smoke/consumer/build/
 /captures
 /out
 .externalNativeBuild

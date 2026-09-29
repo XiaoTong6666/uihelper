@@ -31,3 +31,4 @@ miuix-preference = { module = "top.yukonga.miuix.kmp:miuix-preference-android", 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

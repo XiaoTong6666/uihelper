@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">Expand navigation</string>
+    <string name="uihelper_collapse_navigation">Collapse navigation</string>
+    <string name="uihelper_pull_refresh">Pull to refresh</string>
+    <string name="uihelper_release_refresh">Release to refresh</string>
+    <string name="uihelper_refreshing">Refreshing</string>
+    <string name="uihelper_refresh_complete">Refresh complete</string>
+</resources>

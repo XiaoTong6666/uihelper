@@ -19,6 +19,7 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     `maven-publish`
 }
 
@@ -27,7 +28,8 @@ val gitCommitCount = providers.exec {
     workingDir = projectDir
     commandLine("git", "rev-list", "--count", "HEAD")
 }.standardOutput.asText.map { it.trim() }
-version = gitCommitCount.get()
+// Explicit versions allow unpublished local smoke builds without overwriting a released artifact.
+version = providers.gradleProperty("uihelper.version").orElse(gitCommitCount).get()
 
 android {
     namespace = "io.github.xiaotong6666.uihelper"
@@ -85,16 +87,17 @@ publishing {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
+    // Types in public composable signatures must be exposed to independent AAR consumers.
+    api(libs.androidx.compose.ui)
+    api(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
+    api(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.navigationevent.compose)
     implementation(libs.commonmark)
     implementation(libs.appiconloader)
-    implementation(libs.miuix.ui)
+    api(libs.miuix.ui)
     implementation(libs.miuix.blur)
     implementation(libs.miuix.preference)
     // NavKey/NavBackStack and the public inline Saver contract cross the AAR API boundary.
@@ -104,4 +107,5 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
+    testImplementation("junit:junit:4.13.2")
 }

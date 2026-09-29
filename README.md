@@ -22,24 +22,28 @@ Actual backdrop blur is **only enabled when MIUIX RuntimeShader is supported** (
 
 JVM-17 consumers can also use this library's reified `rememberNavigator` helper; do not call upstream MIUIX Nav's JVM-21 inline helper directly from a JVM-17 module. In projects with strict module dependency boundaries, consume the published AAR from a UI module (or classify the included module explicitly); do not add this UI dependency to a headless SDK module.
 
-For active development, add this repository as a Git submodule or sibling directory, then include the module in the consumer's `settings.gradle.kts`:
+For active development, add this repository as a Git submodule or sibling directory, then include the **independent build** in the consumer's `settings.gradle.kts`. This preserves uihelper's own version catalog and plugin versions:
 
 ```kotlin
-include(":uihelper")
+includeBuild("uihelper")
 ```
 
-Consume it from the Android app module:
+Consume it using the matching published coordinates (Gradle composite-build substitution):
 
 ```kotlin
 dependencies {
-    implementation(project(":uihelper"))
+    implementation("io.github.xiaotong6666:uihelper:<git-commit-count>")
 }
 ```
+
+Do **not** use `include(":uihelper")` with the current standalone build: it merges the consumer's `libs` catalog with uihelper's catalog and can silently resolve a different toolchain. Both projects must be configured for compatible Compose / Android APIs. Add a separate version-catalog mapping if the consumer uses aliases.
 
 For a local binary dependency, publish the release AAR from this directory:
 
 ```bash
 ./gradlew publishReleasePublicationToMavenLocal
+# For an unpublished smoke version that cannot overwrite a released commit-count version:
+./gradlew publishReleasePublicationToMavenLocal -Puihelper.version=local-smoke
 ```
 
 Then add `mavenLocal()` to the consumer's repositories and use:
@@ -48,7 +52,31 @@ Then add `mavenLocal()` to the consumer's repositories and use:
 implementation("io.github.xiaotong6666:uihelper:<git-commit-count>")
 ```
 
-The published version is `git rev-list --count HEAD` from the `uihelper` repository, so it advances with each committed change.
+The default published version is `git rev-list --count HEAD` from the `uihelper` repository. Override it with `-Puihelper.version=...` for a uniquely named unpublished build; this override does not change any committed release. **Changes in a Git submodule worktree are not fetched by another project until committed and the consumer updates its submodule SHA.**
+
+### Consumer API contracts
+
+- `AdaptiveTheme` accepts the app's optional `materialColorScheme` and `themeController`. A consumer controls branding; uihelper only provides standalone defaults.
+- `Navigator<T>` uses typed mutation methods and allows duplicate routes with `push`. Use `pushSingleTop` or `pushUnique` explicitly when appropriate. Define a serializable route hierarchy when using `rememberNavigator`; do not mutate its public `backStack` except to integrate it with a host.
+- `AdaptiveNavigationShell` defaults to first-page Back and responsive navigation rail, but callers can configure `backBehavior`, `onBackRequested`, `navigationRail`, and `swipeNavigationEnabled`.
+- `rememberExpandableSectionState(identity = ...)` accepts a stable business ID, **never localized display text**. The default is positional state; when used in reorderable lists, wrap the call in a stable Compose `key(id)` or a keyed lazy item.
+- `LabeledValueLayout` in `Auto` mode queries child intrinsic widths; use `mode = LabeledValueMode.Stacked` for children without intrinsic measurement support.
+- `WrapSafeText` inserts visual U+200B breaks. Accessibility receives the original text, but selection may contain U+200B; explicit copy actions must use the original model value.
+- Domain-shaped `HomeStatusCard` and `UpdatePromptDialogMiuix` are optional recipes, not required shell primitives. Release notes, status meanings, actions, and translations belong to the consumer.
+
+### Verification
+
+Run uihelper's contract tests, independent Release AAR build, and its **separate**
+consumer source build (which does not import Duck or share Duck's catalog):
+
+```bash
+./gradlew :testDebugUnitTest :assembleRelease
+./gradlew -p smoke :consumer:compileDebugKotlin
+```
+
+The independent consumer source lives under `smoke/` and exercises typed routes,
+theme injection, shell policies and the adaptive components. See `smoke/README.md`
+for binary AAR verification. Runtime UI/gesture behavior still requires device tests.
 
 ## Scope
 
@@ -84,6 +112,9 @@ These packages are the supported surface for feature and page code.
 - `io.github.xiaotong6666.uihelper.adaptive`
   - semantic cross-skin components
   - preferred import target for business pages
+  - `WrapSafeText` for long identifiers, paths and other unbroken text in either skin
+  - `rememberExpandableSectionState` and `ExpandableSectionBody` for generic saveable disclosure state and skin-specific expansion motion; callers own headers, badges, and business meaning
+  - `LabeledValueLayout` for responsive inline-or-stacked label/value placement without business-specific row models
 - `io.github.xiaotong6666.uihelper.common`
   - small reusable UI helpers shared across skins
 - `io.github.xiaotong6666.uihelper.model`

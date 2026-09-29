@@ -50,7 +50,6 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 @Composable
 fun SectionTitleMiuix(
@@ -143,7 +142,6 @@ fun ConfigToggleCardMiuix(
 ) {
     Card(
         onClick = onToggle,
-        showIndication = true,
         colors = CardDefaults.defaultColors(
             color = MiuixTheme.colorScheme.surfaceContainerHighest,
             contentColor = MiuixTheme.colorScheme.onSurfaceContainerHighest,
@@ -324,7 +322,6 @@ fun WarningBannerMiuix(
             onClick = onClick,
             colors = colors,
             showIndication = true,
-            pressFeedbackType = PressFeedbackType.Sink,
             insideMargin = PaddingValues(0.dp),
         ) { content() }
     } else {
@@ -368,7 +365,6 @@ fun InfoBannerMiuix(
             onClick = onClick,
             colors = colors,
             showIndication = true,
-            pressFeedbackType = PressFeedbackType.Sink,
             insideMargin = PaddingValues(0.dp),
         ) { content() }
     } else {

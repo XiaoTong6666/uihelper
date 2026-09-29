@@ -61,7 +61,8 @@ fun ReusableConsumer() {
                     containerColor = Color.DarkGray,
                     accentColor = Color.LightGray,
                     onClick = {},
-                    footer = { Text("Consumer-owned footer") },
+                    metaContent = { Text("Consumer-owned metadata") },
+                    actionContent = { Text("Consumer-owned action") },
                 )
             }
         }

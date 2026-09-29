@@ -63,7 +63,7 @@ The default published version is `git rev-list --count HEAD` from the `uihelper`
 - `LabeledValueLayout` in `Auto` mode queries child intrinsic widths; use `mode = LabeledValueMode.Stacked` for children without intrinsic measurement support.
 - `WrapSafeText` inserts visual U+200B breaks. Accessibility receives the original text, but selection may contain U+200B; explicit copy actions must use the original model value.
 - Domain-shaped `HomeStatusCard` and `UpdatePromptDialogMiuix` are optional recipes, not required shell primitives. Release notes, status meanings, actions, and translations belong to the consumer.
-- `StatusHeroCardMiuix` accepts a generic optional `footer` slot below its decorative illustration. Interactive MIUIX status cards use both native Tilt feedback and a visible press indication (`showIndication`), while passive cards remain non-clickable. Supply app-specific build details or export hints through the slot rather than placing domain data inside uihelper.
+- `StatusHeroCardMiuix` accepts optional, app-owned `metaContent` and `actionContent` slots. Both live inside one status hero, with the decorative glyph anchored at the lower-right, while metadata is restricted to the left column. The original `footer` slot remains supported for existing consumers. Interactive cards use native Tilt and visible pressed indication; uihelper does not know about build details, export, or any other app domain.
 
 ### Verification
 

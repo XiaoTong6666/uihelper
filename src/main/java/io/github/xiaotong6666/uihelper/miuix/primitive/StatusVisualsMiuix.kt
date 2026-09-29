@@ -78,6 +78,8 @@ fun StatusHeroCardMiuix(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
+    metaContent: (@Composable ColumnScope.() -> Unit)? = null,
+    actionContent: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -94,36 +96,76 @@ fun StatusHeroCardMiuix(
         showIndication = onClick != null,
         insideMargin = PaddingValues(0.dp),
     ) {
+        val structured = metaContent != null || actionContent != null
         Column(modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier.fillMaxWidth().heightIn(min = if (footer == null) 136.dp else 108.dp).squircleClip(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (structured) Modifier else Modifier.heightIn(
+                            min = if (footer == null) 136.dp else 108.dp,
+                        ),
+                    )
+                    .squircleClip(16.dp),
+            ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.align(Alignment.BottomEnd).offset(x = 18.dp, y = 25.dp).size(112.dp),
+                    // Structured heroes anchor their signal to the bottom of the *whole*
+                    // card; it no longer floats above the metadata and action row.
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 18.dp, y = if (structured) 18.dp else 25.dp)
+                        .size(112.dp),
                     tint = accentColor.copy(alpha = 0.65f),
                 )
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(start = 20.dp, top = 20.dp, end = 94.dp, bottom = if (footer == null) 24.dp else 14.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(
-                        text = title,
-                        style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.SemiBold),
-                        color = MiuixTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = summary,
-                        style = MiuixTheme.textStyles.body2,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = 20.dp,
+                                top = 20.dp,
+                                end = if (structured) 20.dp else 94.dp,
+                                bottom = if (structured) 0.dp else if (footer == null) 24.dp else 14.dp,
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = title,
+                            style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.SemiBold),
+                            color = MiuixTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = summary,
+                            style = MiuixTheme.textStyles.body2,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    if (metaContent != null) {
+                        // The status glyph owns the lower-right, while app-owned
+                        // metadata uses the full available *left* column.
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 20.dp, end = 108.dp, top = 6.dp, bottom = 5.dp),
+                            verticalArrangement = Arrangement.spacedBy(5.dp),
+                            content = metaContent,
+                        )
+                    }
+                    if (actionContent != null) {
+                        Column(modifier = Modifier.fillMaxWidth(), content = actionContent)
+                    }
                 }
             }
-            // Keep supplementary information below the decorative glyph rather than
-            // forcing it into the narrow title column. This slot is app-agnostic.
+            // Preserve the original footer contract for existing consumers.
             if (footer != null) Column(modifier = Modifier.fillMaxWidth(), content = footer)
         }
     }

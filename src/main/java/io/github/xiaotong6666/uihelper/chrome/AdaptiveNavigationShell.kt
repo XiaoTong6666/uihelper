@@ -63,6 +63,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -245,16 +246,34 @@ fun AdaptiveNavigationShell(
         animatePageChanges = !useNavigationRail,
     )
     val settledPage = pagerState.settledPage
-    val activePageIndex = shellPagerState.selectedPage.coerceIn(0, items.lastIndex)
+    // FuseHide's pager fix (d0d727e): chrome must follow the page that is
+    // physically visible, never the optimistic destination set by a tab click.
+    // A tap may start its spring several frames before the pager actually moves.
+    // The fractional pager offset changes every animation frame. Derived state
+    // invalidates the chrome only when the *integer* visible page changes.
+    val activePageIndex by remember(pagerState, items.size) {
+        derivedStateOf {
+            visiblePagerPage(
+                currentPage = pagerState.currentPage,
+                currentPageOffsetFraction = pagerState.currentPageOffsetFraction,
+                settledPage = pagerState.settledPage,
+                isScrollInProgress = pagerState.isScrollInProgress,
+                pageCount = items.size,
+            )
+        }
+    }
     val activeItem = items[activePageIndex]
     val appChromeState = rememberAppChromeState()
     val chromeSpec = appChromeState.spec
-    val miuixScrollBehavior = MiuixScrollBehavior()
+    // Vertical events from the outgoing and incoming page must not compete for
+    // the one shared title while the gesture belongs to the horizontal pager.
+    val canScrollMiuixChrome = remember(pagerState) { { !pagerState.isScrollInProgress } }
+    val miuixScrollBehavior = MiuixScrollBehavior(canScroll = canScrollMiuixChrome)
     val isTopBarScrollable = topBarMode == NavigationShellTopBarMode.Scrollable
     var contentReady by remember { mutableStateOf(false) }
     var navigationRailExpanded by rememberSaveable { mutableStateOf(false) }
     val onPageSelected: (Int) -> Unit = { index ->
-        if (shellPagerState.selectedPage != index) {
+        if (pagerState.isScrollInProgress || settledPage != index) {
             shellPagerState.animateToPage(index)
         }
     }
@@ -520,7 +539,7 @@ fun AdaptiveNavigationShell(
                                 content(
                                     page,
                                     paddingValues,
-                                    page == settledPage,
+                                    page == activePageIndex,
                                     pageModifier,
                                 )
                             }
@@ -741,7 +760,7 @@ fun AdaptiveNavigationShell(
                                 content(
                                     page,
                                     paddingValues,
-                                    page == settledPage,
+                                    page == activePageIndex,
                                     Modifier,
                                 )
                             }

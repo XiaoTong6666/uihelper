@@ -86,6 +86,7 @@ fun StatusHeroCardMiuix(
         // Match FuseHide HomeStatusCard: the native TiltFeedback rotates toward the
         // touch position and springs back. Passive status cards have no press feedback.
         onClick = onClick,
+        showIndication = onClick != null,
         pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
         insideMargin = PaddingValues(0.dp),
     ) {

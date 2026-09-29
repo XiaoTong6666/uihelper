@@ -82,7 +82,14 @@ fun StatusChipMiuix(
         animationSpec = spring(),
         label = "status_chip_content",
     )
-    Card(modifier = modifier.heightIn(min = 118.dp), colors = CardDefaults.defaultColors(color = containerColor, contentColor = contentColor), onClick = onClick, insideMargin = PaddingValues(0.dp)) {
+    Card(
+        modifier = modifier.heightIn(min = 118.dp),
+        colors = CardDefaults.defaultColors(color = containerColor, contentColor = contentColor),
+        onClick = onClick,
+        showIndication = onClick != null,
+        pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
+        insideMargin = PaddingValues(0.dp),
+    ) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(text = label.uppercase(Locale.US), style = MiuixTheme.textStyles.footnote2, color = if (emphasized) MiuixTheme.colorScheme.onPrimaryVariant.copy(alpha = 0.72f) else MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(text = value, style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.Medium), color = if (emphasized) Color.White else MiuixTheme.colorScheme.onSurfaceContainerHighest, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -156,7 +163,8 @@ fun HomeStatusCardMiuix(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = containerColor),
             onClick = onClick,
-            pressFeedbackType = PressFeedbackType.Tilt,
+            showIndication = onClick != null,
+            pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
             insideMargin = PaddingValues(0.dp),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {

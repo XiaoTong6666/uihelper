@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -35,6 +37,26 @@ import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+
+@Composable
+fun Modifier.adaptiveVerticalScrollFeedback(): Modifier = when (LocalUiMode.current) {
+    UiMode.Miuix -> this.scrollEndHaptic().overScrollVertical()
+    UiMode.Material -> this
+}
+
+@Composable
+fun Modifier.adaptiveViewportOverscroll(materialEffect: OverscrollEffect?): Modifier =
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> this
+        UiMode.Material -> if (materialEffect != null) this.overscroll(materialEffect) else this
+    }
+
+@Composable
+fun adaptiveScrollableOverscrollEffect(materialEffect: OverscrollEffect?): OverscrollEffect? =
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> null
+        UiMode.Material -> materialEffect
+    }
 
 @Composable
 fun AdaptiveScrollColumn(

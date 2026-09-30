@@ -98,6 +98,7 @@ dependencies {
     implementation(libs.commonmark)
     implementation(libs.appiconloader)
     api(libs.miuix.ui)
+    implementation(libs.miuix.icons)
     implementation(libs.miuix.blur)
     implementation(libs.miuix.preference)
     // NavKey/NavBackStack and the public inline Saver contract cross the AAR API boundary.

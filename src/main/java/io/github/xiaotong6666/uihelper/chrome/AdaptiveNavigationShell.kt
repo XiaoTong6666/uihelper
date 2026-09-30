@@ -149,6 +149,8 @@ data class NavigationShellItem(
     val largeTitleLeadingContent: (@Composable () -> Unit)? = null,
     /** Optional app-owned action(s). Overrides [action] when supplied. */
     val trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    /** Custom Material title slot, e.g. a brand icon next to the title text. */
+    val materialTitleContent: (@Composable () -> Unit)? = null,
 )
 
 enum class NavigationShellTopBarMode {
@@ -247,6 +249,8 @@ fun AdaptiveNavigationShell(
     val pagerMode = PagerInterceptionMode.CrossAxisInterceptor
     val interceptPagerGestures = swipeNavigationEnabled && pagerMode == PagerInterceptionMode.CrossAxisInterceptor
     val pagerState = rememberPagerState(initialPage = coercedSelectedIndex, pageCount = { items.size })
+    val swipeExclusion = remember { PagerSwipeExclusionState() }
+    val userSwipeEnabled = swipeNavigationEnabled && !swipeExclusion.isBlocked
     val shellPagerState = rememberNavigationShellPagerState(
         pagerState = pagerState,
         animatePageChanges = !useNavigationRail,
@@ -485,6 +489,7 @@ fun AdaptiveNavigationShell(
             ) { paddingValues ->
                 CompositionLocalProvider(
                     LocalAppChromeState provides appChromeState,
+                    LocalPagerSwipeExclusionState provides swipeExclusion,
                     LocalPageHostHandle provides pageHostHandle,
                     LocalMiuixBlurActive provides blurActive,
                     LocalMiuixBlurBackdrop provides blurBackdrop,
@@ -540,11 +545,11 @@ fun AdaptiveNavigationShell(
                                     .pagerGestureOverride(
                                         pagerState = pagerState,
                                         mode = pagerMode,
-                                        enabled = swipeNavigationEnabled,
+                                        enabled = userSwipeEnabled,
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = swipeNavigationEnabled && !interceptPagerGestures,
+                                userScrollEnabled = userSwipeEnabled && !interceptPagerGestures,
                                 pageNestedScrollConnection = PagerGestureNestedScrollConnection,
                                 flingBehavior = flingBehavior(
                                     state = pagerState,
@@ -627,8 +632,8 @@ fun AdaptiveNavigationShell(
                 topBar = chromeSpec.materialTopBar ?: {
                     if (isTopBarScrollable) {
                         LargeFlexibleTopAppBar(
-                            title = { Text(text = activeItem.topBarTitle) },
-                            navigationIcon = { activeItem.leadingContent?.invoke() },
+                            title = { activeItem.materialTitleContent?.invoke() ?: Text(text = activeItem.topBarTitle) },
+                            navigationIcon = { if (activeItem.materialTitleContent == null) activeItem.leadingContent?.invoke() },
                             actions = {
                                 if (activeItem.trailingContent != null) {
                                     activeItem.trailingContent.invoke(this)
@@ -650,8 +655,8 @@ fun AdaptiveNavigationShell(
                         )
                     } else {
                         TopAppBar(
-                            title = { Text(text = activeItem.topBarTitle) },
-                            navigationIcon = { activeItem.leadingContent?.invoke() },
+                            title = { activeItem.materialTitleContent?.invoke() ?: Text(text = activeItem.topBarTitle) },
+                            navigationIcon = { if (activeItem.materialTitleContent == null) activeItem.leadingContent?.invoke() },
                             actions = {
                                 if (activeItem.trailingContent != null) {
                                     activeItem.trailingContent.invoke(this)
@@ -708,6 +713,7 @@ fun AdaptiveNavigationShell(
             ) { paddingValues ->
                 CompositionLocalProvider(
                     LocalAppChromeState provides appChromeState,
+                    LocalPagerSwipeExclusionState provides swipeExclusion,
                     LocalPageHostHandle provides pageHostHandle,
                     LocalMaterialNestedScrollConnection provides scrollBehavior.nestedScrollConnection.takeIf { isTopBarScrollable },
                 ) {
@@ -792,11 +798,11 @@ fun AdaptiveNavigationShell(
                                     .pagerGestureOverride(
                                         pagerState = pagerState,
                                         mode = pagerMode,
-                                        enabled = swipeNavigationEnabled,
+                                        enabled = userSwipeEnabled,
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = swipeNavigationEnabled && !interceptPagerGestures,
+                                userScrollEnabled = userSwipeEnabled && !interceptPagerGestures,
                                 pageNestedScrollConnection = PagerGestureNestedScrollConnection,
                                 flingBehavior = flingBehavior(
                                     state = pagerState,

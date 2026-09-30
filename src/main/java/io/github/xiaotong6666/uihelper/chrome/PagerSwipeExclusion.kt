@@ -18,6 +18,7 @@ package io.github.xiaotong6666.uihelper.chrome
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -44,6 +45,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -51,6 +53,11 @@ import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
+
+private sealed interface PagerMotionEvent {
+    data class Delta(val x: Float) : PagerMotionEvent
+    data class Finish(val velocityX: Float) : PagerMotionEvent
+}
 
 /** Registry of root-coordinate regions whose gestures belong to child content, not the shell pager. */
 internal class PagerSwipeExclusionRegistry {
@@ -76,6 +83,7 @@ internal class PagerSwipeExclusionRegistry {
     fun contains(page: Int, positionInRoot: Offset): Boolean = regions.any { (owner, bounds) ->
         ownerPages[owner] == page && positionInRoot in bounds
     }
+
 }
 
 internal val LocalPagerSwipeExclusionRegistry = compositionLocalOf<PagerSwipeExclusionRegistry?> { null }
@@ -118,16 +126,21 @@ internal fun Modifier.pagerSwipeExclusionHost(
     val layoutDirection = LocalLayoutDirection.current
     var hostBounds = Rect.Zero
     return this
-        .onGloballyPositioned { hostBounds = it.boundsInRoot() }
+        .onGloballyPositioned {
+            val next = it.boundsInRoot()
+            if (next != hostBounds) hostBounds = next
+        }
         .pointerInput(registry, page, pagerState, enabled, layoutDirection, settleAnimationSpec) {
             if (!enabled) return@pointerInput
             val minimumVelocity = 400.dp.toPx()
             coroutineScope {
                 val gestureScope = this
+                var motionJob: Job? = null
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
                     val positionInRoot = hostBounds.topLeft + down.position
-                    if (registry.contains(page, positionInRoot)) return@awaitEachGesture
+                    val excluded = registry.contains(page, positionInRoot)
+                    if (excluded) return@awaitEachGesture
 
                     val velocityTracker = VelocityTracker().apply { addPointerInputChange(down) }
                     val touchSlop = viewConfiguration.touchSlop
@@ -149,17 +162,49 @@ internal fun Modifier.pagerSwipeExclusionHost(
                         if (abs(accumulated.x) <= abs(accumulated.y)) return@awaitEachGesture
                         change.consume()
 
+                        // A new horizontal drag takes over from the currently displayed position.
+                        // Only another horizontal pager gesture may interrupt this motion; a
+                        // vertical child gesture must not cancel a pending snap and strand the
+                        // pager between pages.
+                        motionJob?.cancel()
+                        motionJob = null
+
                         val directionSign = if (
                             (layoutDirection == LayoutDirection.Rtl) xor pagerState.layoutInfo.reverseLayout
                         ) 1f else -1f
 
-                        val deltas = Channel<Float>(Channel.UNLIMITED)
-                        val dragJob = gestureScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                        val events = Channel<PagerMotionEvent>(Channel.UNLIMITED)
+                        motionJob = gestureScope.launch(start = CoroutineStart.UNDISPATCHED) {
                             pagerState.scroll(MutatePriority.UserInput) {
-                                for (delta in deltas) scrollBy(delta * directionSign)
+                                for (motionEvent in events) {
+                                    when (motionEvent) {
+                                        is PagerMotionEvent.Delta -> scrollBy(motionEvent.x * directionSign)
+                                        is PagerMotionEvent.Finish -> {
+                                            val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                                            val signedVelocity = motionEvent.velocityX * directionSign
+                                            val target = when {
+                                                signedVelocity > minimumVelocity -> ceil(position).toInt()
+                                                signedVelocity < -minimumVelocity -> floor(position).toInt()
+                                                else -> position.roundToInt()
+                                            }.coerceIn(0, pagerState.pageCount - 1)
+                                            val pageSize = pagerState.layoutInfo.pageSize + pagerState.layoutInfo.pageSpacing
+                                            val distance = pagerState.getOffsetDistanceInPages(target) * pageSize
+                                            var previousValue = 0f
+                                            animate(
+                                                initialValue = 0f,
+                                                targetValue = distance,
+                                                initialVelocity = signedVelocity,
+                                                animationSpec = settleAnimationSpec,
+                                            ) { value, _ ->
+                                                val delta = value - previousValue
+                                                previousValue += scrollBy(delta)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
-                        deltas.trySend(accumulated.x)
+                        events.trySend(PagerMotionEvent.Delta(accumulated.x))
                         try {
                             while (true) {
                                 val dragEvent = awaitPointerEvent(pass = PointerEventPass.Main)
@@ -171,23 +216,17 @@ internal fun Modifier.pagerSwipeExclusionHost(
                                 if (dragChange.changedToUpIgnoreConsumed()) break
                                 val deltaX = dragChange.positionChange().x
                                 dragChange.consume()
-                                deltas.trySend(deltaX)
+                                events.trySend(PagerMotionEvent.Delta(deltaX))
                             }
                         } finally {
-                            deltas.close()
+                            // Keep the same PagerState.scroll mutation alive for the snap. This is
+                            // important because settledPage is derived from isScrollInProgress;
+                            // ending the drag mutation before starting the snap can temporarily
+                            // make the destination look settled and tear down this host mid-snap.
                         }
                         val releaseVelocityX = velocityTracker.calculateVelocity().x
-                        gestureScope.launch {
-                            dragJob.join()
-                            val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                            val signedVelocity = releaseVelocityX * directionSign
-                            val target = when {
-                                signedVelocity > minimumVelocity -> ceil(position).toInt()
-                                signedVelocity < -minimumVelocity -> floor(position).toInt()
-                                else -> position.roundToInt()
-                            }.coerceIn(0, pagerState.pageCount - 1)
-                            pagerState.animateScrollToPage(target, animationSpec = settleAnimationSpec)
-                        }
+                        events.trySend(PagerMotionEvent.Finish(releaseVelocityX))
+                        events.close()
                         return@awaitEachGesture
                     }
                 }

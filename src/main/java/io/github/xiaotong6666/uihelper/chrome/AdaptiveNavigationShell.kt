@@ -18,6 +18,7 @@
 
 package io.github.xiaotong6666.uihelper.chrome
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -108,6 +109,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults as MiuixTopAppBarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
@@ -153,7 +155,18 @@ data class NavigationShellItem(
     val trailingContent: (@Composable RowScope.() -> Unit)? = null,
     /** Custom Material title slot, e.g. a brand icon next to the title text. */
     val materialTitleContent: (@Composable () -> Unit)? = null,
+    /**
+     * Selects how horizontal page gestures are owned for this page. Region-aware pages keep one
+     * stable parent recognizer for their whole lifetime and delegate gestures that start inside a
+     * [pagerSwipeExclusion] region to that child.
+     */
+    val pagerGesturePolicy: NavigationShellPagerGesturePolicy = NavigationShellPagerGesturePolicy.Default,
 )
+
+enum class NavigationShellPagerGesturePolicy {
+    Default,
+    RegionAware,
+}
 
 enum class NavigationShellTopBarMode {
     Scrollable,
@@ -165,6 +178,34 @@ enum class NavigationShellBackBehavior { FirstPage, PreviousPage, Disabled }
 
 /** A stable one-line native measurement slot; app-owned expanded titles are rendered on top. */
 private const val StableLargeTitleMeasureText = "\u00A0"
+
+/** Match MIUIX's native compact-title reveal for a paired large/compact leading glyph. */
+@Composable
+private fun MiuixAnimatedCompactLeading(
+    visible: Boolean,
+    content: @Composable () -> Unit,
+) {
+    val alpha = remember { Animatable(if (visible) 1f else 0f) }
+    val translationY = remember { Animatable(if (visible) 0f else 20f) }
+
+    LaunchedEffect(visible) {
+        val spec = folmeSpring<Float>(
+            damping = 1.0f,
+            response = if (visible) 0.30f else 0.15f,
+        )
+        launch { alpha.animateTo(if (visible) 1f else 0f, spec) }
+        launch { translationY.animateTo(if (visible) 0f else 20f, spec) }
+    }
+
+    Box(
+        modifier = Modifier.graphicsLayer {
+            this.alpha = alpha.value
+            this.translationY = translationY.value
+        },
+    ) {
+        content()
+    }
+}
 
 private class NavigationShellPagerState(
     val pagerState: PagerState,
@@ -260,8 +301,9 @@ fun AdaptiveNavigationShell(
     // either HorizontalPager's native drag or MIUIX's pagerGestureOverride. This makes ownership
     // a down-time geometry decision: a gesture that starts in an exclusion never enters a pager
     // recognizer at all, while the rest of the page keeps normal horizontal tab navigation.
-    val pageHasSwipeExclusions = pagerSwipeExclusions.hasRegions(settledPage)
-    val useCustomPagerGestures = swipeNavigationEnabled && !pageHasSwipeExclusions
+    val pageUsesRegionAwarePager =
+        items.getOrNull(settledPage)?.pagerGesturePolicy == NavigationShellPagerGesturePolicy.RegionAware
+    val useCustomPagerGestures = swipeNavigationEnabled && !pageUsesRegionAwarePager
     val interceptPagerGestures = useCustomPagerGestures && pagerMode == PagerInterceptionMode.CrossAxisInterceptor
     // FuseHide's pager fix (d0d727e): chrome must follow the page that is
     // physically visible, never the optimistic destination set by a tab click.
@@ -361,6 +403,17 @@ fun AdaptiveNavigationShell(
                             val defaultTopBar: ComposableContent = {
                                 if (isTopBarScrollable) {
                                     val largeLeading = activeItem.largeTitleLeadingContent
+                                    val hasLargeLeading = largeLeading != null
+                                    val compactLeadingVisible by remember(
+                                        miuixScrollBehavior,
+                                        activePageIndex,
+                                        hasLargeLeading,
+                                    ) {
+                                        derivedStateOf {
+                                            !hasLargeLeading ||
+                                                miuixScrollBehavior.state.collapsedFraction * 3f >= 1f
+                                        }
+                                    }
                                     Box(Modifier.fillMaxWidth().wrapContentHeight().clipToBounds()) {
                                         top.yukonga.miuix.kmp.basic.TopAppBar(
                                             title = activeItem.compactTopBarTitle,
@@ -376,11 +429,15 @@ fun AdaptiveNavigationShell(
                                             // that would fit between the navigation and action icons.
                                             titlePadding = MiuixTopAppBarDefaults.TitlePadding,
                                             navigationIcon = {
-                                                Box(
-                                                    modifier = if (largeLeading != null) Modifier.graphicsLayer {
-                                                        alpha = (miuixScrollBehavior.state.collapsedFraction * 3f).coerceIn(0f, 1f)
-                                                    } else Modifier,
-                                                ) { activeItem.leadingContent?.invoke() }
+                                                if (largeLeading != null) {
+                                                    MiuixAnimatedCompactLeading(
+                                                        visible = compactLeadingVisible,
+                                                    ) {
+                                                        activeItem.leadingContent?.invoke()
+                                                    }
+                                                } else {
+                                                    activeItem.leadingContent?.invoke()
+                                                }
                                             },
                                             actions = {
                                                 if (activeItem.trailingContent != null) {
@@ -399,10 +456,12 @@ fun AdaptiveNavigationShell(
                                         )
                                         // A single-line, asymmetrically spaced expanded title: only the
                                         // leading glyph uses width; the right-hand text area remains available.
-                                        // This also keeps native heightOffsetLimit identical across tab titles.
+                                        // Keep this as a pure overlay: matchParentSize children do not contribute
+                                        // to Box measurement, so Scaffold continues to observe the native
+                                        // TopAppBar's shrinking height and moves page content upward in lockstep.
                                         Row(
                                             modifier = Modifier
-                                                .fillMaxWidth()
+                                                .matchParentSize()
                                                 .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
                                                 .padding(top = MiuixTopAppBarDefaults.CollapsedHeight)
                                                 .offset { IntOffset(0, miuixScrollBehavior.state.heightOffset.roundToInt()) }
@@ -552,7 +611,7 @@ fun AdaptiveNavigationShell(
                                     registry = pagerSwipeExclusions,
                                     page = settledPage,
                                     pagerState = pagerState,
-                                    enabled = swipeNavigationEnabled && pageHasSwipeExclusions,
+                                    enabled = swipeNavigationEnabled && pageUsesRegionAwarePager,
                                     settleAnimationSpec = PagerNavigationSpringSpec,
                                 ),
                         ) {
@@ -567,7 +626,7 @@ fun AdaptiveNavigationShell(
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = swipeNavigationEnabled && !pageHasSwipeExclusions && !interceptPagerGestures,
+                                userScrollEnabled = swipeNavigationEnabled && !pageUsesRegionAwarePager && !interceptPagerGestures,
                                 pageNestedScrollConnection = if (interceptPagerGestures) {
                                     PagerGestureNestedScrollConnection
                                 } else {
@@ -824,7 +883,7 @@ fun AdaptiveNavigationShell(
                                     registry = pagerSwipeExclusions,
                                     page = settledPage,
                                     pagerState = pagerState,
-                                    enabled = swipeNavigationEnabled && pageHasSwipeExclusions,
+                                    enabled = swipeNavigationEnabled && pageUsesRegionAwarePager,
                                     settleAnimationSpec = PagerNavigationSpringSpec,
                                 ),
                         ) {
@@ -839,7 +898,7 @@ fun AdaptiveNavigationShell(
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = swipeNavigationEnabled && !pageHasSwipeExclusions && !interceptPagerGestures,
+                                userScrollEnabled = swipeNavigationEnabled && !pageUsesRegionAwarePager && !interceptPagerGestures,
                                 pageNestedScrollConnection = if (interceptPagerGestures) {
                                     PagerGestureNestedScrollConnection
                                 } else {

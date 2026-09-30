@@ -37,8 +37,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults.flingBehavior
+import androidx.compose.foundation.pager.PagerDefaults.pageNestedScrollConnection
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -247,15 +249,20 @@ fun AdaptiveNavigationShell(
     val coercedSelectedIndex = selectedIndex.coerceIn(0, items.lastIndex)
     val useNavigationRail = navigationRail ?: shouldShowSplitPane()
     val pagerMode = PagerInterceptionMode.CrossAxisInterceptor
-    val interceptPagerGestures = swipeNavigationEnabled && pagerMode == PagerInterceptionMode.CrossAxisInterceptor
     val pagerState = rememberPagerState(initialPage = coercedSelectedIndex, pageCount = { items.size })
-    val swipeExclusion = remember { PagerSwipeExclusionState() }
-    val userSwipeEnabled = swipeNavigationEnabled && !swipeExclusion.isBlocked
+    val pagerSwipeExclusions = remember { PagerSwipeExclusionRegistry() }
     val shellPagerState = rememberNavigationShellPagerState(
         pagerState = pagerState,
         animatePageChanges = !useNavigationRail,
     )
     val settledPage = pagerState.settledPage
+    // A page with interactive canvases/maps uses uihelper's region-aware shell drag instead of
+    // either HorizontalPager's native drag or MIUIX's pagerGestureOverride. This makes ownership
+    // a down-time geometry decision: a gesture that starts in an exclusion never enters a pager
+    // recognizer at all, while the rest of the page keeps normal horizontal tab navigation.
+    val pageHasSwipeExclusions = pagerSwipeExclusions.hasRegions(settledPage)
+    val useCustomPagerGestures = swipeNavigationEnabled && !pageHasSwipeExclusions
+    val interceptPagerGestures = useCustomPagerGestures && pagerMode == PagerInterceptionMode.CrossAxisInterceptor
     // FuseHide's pager fix (d0d727e): chrome must follow the page that is
     // physically visible, never the optimistic destination set by a tab click.
     // A tap may start its spring several frames before the pager actually moves.
@@ -489,8 +496,8 @@ fun AdaptiveNavigationShell(
             ) { paddingValues ->
                 CompositionLocalProvider(
                     LocalAppChromeState provides appChromeState,
-                    LocalPagerSwipeExclusionState provides swipeExclusion,
                     LocalPageHostHandle provides pageHostHandle,
+                    LocalPagerSwipeExclusionRegistry provides pagerSwipeExclusions,
                     LocalMiuixBlurActive provides blurActive,
                     LocalMiuixBlurBackdrop provides blurBackdrop,
                     LocalMiuixNestedScrollConnection provides miuixScrollBehavior.nestedScrollConnection.takeIf { isTopBarScrollable },
@@ -537,7 +544,18 @@ fun AdaptiveNavigationShell(
                                 }
                             }
                         }
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .pagerSwipeExclusionHost(
+                                    registry = pagerSwipeExclusions,
+                                    page = settledPage,
+                                    pagerState = pagerState,
+                                    enabled = swipeNavigationEnabled && pageHasSwipeExclusions,
+                                    settleAnimationSpec = PagerNavigationSpringSpec,
+                                ),
+                        ) {
                             HorizontalPager(
                                 state = pagerState,
                                 modifier = Modifier
@@ -545,12 +563,19 @@ fun AdaptiveNavigationShell(
                                     .pagerGestureOverride(
                                         pagerState = pagerState,
                                         mode = pagerMode,
-                                        enabled = userSwipeEnabled,
+                                        enabled = useCustomPagerGestures,
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = userSwipeEnabled && !interceptPagerGestures,
-                                pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+                                userScrollEnabled = swipeNavigationEnabled && !pageHasSwipeExclusions && !interceptPagerGestures,
+                                pageNestedScrollConnection = if (interceptPagerGestures) {
+                                    PagerGestureNestedScrollConnection
+                                } else {
+                                    pageNestedScrollConnection(
+                                        state = pagerState,
+                                        orientation = Orientation.Horizontal,
+                                    )
+                                },
                                 flingBehavior = flingBehavior(
                                     state = pagerState,
                                     snapAnimationSpec = PagerNavigationSpringSpec,
@@ -588,6 +613,7 @@ fun AdaptiveNavigationShell(
                                 CompositionLocalProvider(
                                     LocalMiuixNestedScrollConnection provides pageConnection.takeIf { isTopBarScrollable },
                                     LocalPageHostHandle provides pageHost,
+                                    LocalPagerSwipeExclusionPage provides page,
                                 ) {
                                     content(
                                         page,
@@ -713,8 +739,8 @@ fun AdaptiveNavigationShell(
             ) { paddingValues ->
                 CompositionLocalProvider(
                     LocalAppChromeState provides appChromeState,
-                    LocalPagerSwipeExclusionState provides swipeExclusion,
                     LocalPageHostHandle provides pageHostHandle,
+                    LocalPagerSwipeExclusionRegistry provides pagerSwipeExclusions,
                     LocalMaterialNestedScrollConnection provides scrollBehavior.nestedScrollConnection.takeIf { isTopBarScrollable },
                 ) {
                     Row(modifier = Modifier.fillMaxSize()) {
@@ -790,7 +816,18 @@ fun AdaptiveNavigationShell(
                                 }
                             }
                         }
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .pagerSwipeExclusionHost(
+                                    registry = pagerSwipeExclusions,
+                                    page = settledPage,
+                                    pagerState = pagerState,
+                                    enabled = swipeNavigationEnabled && pageHasSwipeExclusions,
+                                    settleAnimationSpec = PagerNavigationSpringSpec,
+                                ),
+                        ) {
                             HorizontalPager(
                                 state = pagerState,
                                 modifier = Modifier
@@ -798,12 +835,19 @@ fun AdaptiveNavigationShell(
                                     .pagerGestureOverride(
                                         pagerState = pagerState,
                                         mode = pagerMode,
-                                        enabled = userSwipeEnabled,
+                                        enabled = useCustomPagerGestures,
                                     ),
                                 beyondViewportPageCount = if (contentReady) minOf(3, items.lastIndex) else 0,
                                 overscrollEffect = null,
-                                userScrollEnabled = userSwipeEnabled && !interceptPagerGestures,
-                                pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+                                userScrollEnabled = swipeNavigationEnabled && !pageHasSwipeExclusions && !interceptPagerGestures,
+                                pageNestedScrollConnection = if (interceptPagerGestures) {
+                                    PagerGestureNestedScrollConnection
+                                } else {
+                                    pageNestedScrollConnection(
+                                        state = pagerState,
+                                        orientation = Orientation.Horizontal,
+                                    )
+                                },
                                 flingBehavior = flingBehavior(
                                     state = pagerState,
                                     snapAnimationSpec = PagerNavigationSpringSpec,
@@ -812,12 +856,14 @@ fun AdaptiveNavigationShell(
                                 if (!contentReady && page != settledPage) {
                                     return@HorizontalPager
                                 }
-                                content(
-                                    page,
-                                    paddingValues,
-                                    page == activePageIndex,
-                                    Modifier,
-                                )
+                                CompositionLocalProvider(LocalPagerSwipeExclusionPage provides page) {
+                                    content(
+                                        page,
+                                        paddingValues,
+                                        page == activePageIndex,
+                                        Modifier,
+                                    )
+                                }
                             }
                             chromeSpec.overlayContent?.invoke(paddingValues)
                         }

@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.xiaotong6666.uihelper.adaptive.currentLocale
 import io.github.xiaotong6666.uihelper.model.HomeInfoItem
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -58,7 +59,6 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import java.util.Locale
 
 @Composable
 fun StatusChipMiuix(
@@ -72,6 +72,7 @@ fun StatusChipMiuix(
     emphasized: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
+    val locale = currentLocale()
     val containerColor by animateColorAsState(
         targetValue = if (emphasized) MiuixTheme.colorScheme.primaryVariant else MiuixTheme.colorScheme.surfaceContainerHighest,
         animationSpec = spring(),
@@ -84,7 +85,7 @@ fun StatusChipMiuix(
     )
     Card(modifier = modifier.heightIn(min = 118.dp), colors = CardDefaults.defaultColors(color = containerColor, contentColor = contentColor), onClick = onClick, insideMargin = PaddingValues(0.dp)) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(text = label.uppercase(Locale.getDefault()), style = MiuixTheme.textStyles.footnote2, color = if (emphasized) MiuixTheme.colorScheme.onPrimaryVariant.copy(alpha = 0.72f) else MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = label.uppercase(locale), style = MiuixTheme.textStyles.footnote2, color = if (emphasized) MiuixTheme.colorScheme.onPrimaryVariant.copy(alpha = 0.72f) else MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(text = value, style = MiuixTheme.textStyles.title3.copy(fontWeight = FontWeight.Medium), color = if (emphasized) Color.White else MiuixTheme.colorScheme.onSurfaceContainerHighest, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (supportingText != null || supportingMinLines > 0) {
                 val reservedSupportingLines = maxOf(1, supportingMinLines)
@@ -268,9 +269,10 @@ fun HomeInfoCardMiuix(
 
 @Composable
 fun MetricCardMiuix(label: String, value: String, modifier: Modifier = Modifier, valueMaxLines: Int = 2, monospace: Boolean = false) {
+    val locale = currentLocale()
     Card(modifier = modifier.heightIn(min = 96.dp), colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainerHighest, contentColor = MiuixTheme.colorScheme.onSurfaceContainerHighest), insideMargin = PaddingValues(0.dp)) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(text = label.uppercase(Locale.getDefault()), style = MiuixTheme.textStyles.footnote2, color = MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = label.uppercase(locale), style = MiuixTheme.textStyles.footnote2, color = MiuixTheme.colorScheme.onSurfaceVariantSummary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(text = value, style = MiuixTheme.textStyles.main, fontFamily = if (monospace) FontFamily.Monospace else FontFamily.Default, maxLines = valueMaxLines, overflow = TextOverflow.Ellipsis)
         }
     }

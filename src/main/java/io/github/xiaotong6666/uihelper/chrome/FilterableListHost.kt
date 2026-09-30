@@ -57,6 +57,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -109,7 +110,7 @@ data class FilterableListRefreshTexts(
     internal fun asList(): List<String> = listOf(pulling, release, refreshing, complete)
 }
 
-@Immutable
+@Stable
 data class FilterableListContent(
     val materialMain: @Composable (Modifier) -> Unit,
     val materialSearchResults: @Composable (Modifier, closeSearch: () -> Unit) -> Unit,

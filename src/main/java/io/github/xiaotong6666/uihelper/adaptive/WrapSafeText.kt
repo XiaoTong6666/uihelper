@@ -13,7 +13,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalConfiguration
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
@@ -32,7 +31,7 @@ fun WrapSafeText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
 ) {
-    val locale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    val locale = currentLocale()
     val safeText = remember(text, locale) { text.withWrapOpportunities(locale) }
     val accessibleModifier = modifier.semantics { this.text = AnnotatedString(text) }
     val resolvedStyle = if (textAlign == null) style else style.copy(textAlign = textAlign)

@@ -49,8 +49,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.adaptive.currentLocale
 import io.github.xiaotong6666.uihelper.model.HomeInfoItem
-import java.util.Locale
 
 @Composable
 fun StatusChipMaterial(
@@ -241,12 +241,13 @@ private fun StatusChipMaterialContent(
     emphasized: Boolean,
     contentColor: Color,
 ) {
+    val locale = currentLocale()
     Column(
         modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         Text(
-            text = label.uppercase(Locale.getDefault()),
+            text = label.uppercase(locale),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = if (emphasized) contentColor.copy(alpha = 0.78f) else MaterialTheme.colorScheme.primary,
             maxLines = 1,
@@ -304,6 +305,7 @@ fun MetricCardMaterial(
     valueMaxLines: Int = 2,
     monospace: Boolean = false,
 ) {
+    val locale = currentLocale()
     TonalCardMaterial(
         modifier = modifier.heightIn(min = 100.dp),
         containerColor = MaterialTheme.colorScheme.surfaceBright,
@@ -315,7 +317,7 @@ fun MetricCardMaterial(
             verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             Text(
-                text = label.uppercase(Locale.getDefault()),
+                text = label.uppercase(locale),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,

@@ -153,7 +153,7 @@ fun UpdatePromptDialogMiuix(
                 )
             }
         }) { measurables, constraints ->
-            // Same footer-first measurement contract as KernelSU: long notes scroll; buttons stay visible.
+            // Footer-first measurement keeps long notes scrollable while actions stay visible.
             val footer = measurables[1].measure(constraints.copy(minHeight = 0))
             val body = measurables[0].measure(
                 constraints.copy(minHeight = 0, maxHeight = (constraints.maxHeight - footer.height).coerceAtLeast(0)),

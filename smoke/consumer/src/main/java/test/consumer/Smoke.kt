@@ -25,6 +25,7 @@ import io.github.xiaotong6666.uihelper.adaptive.rememberExpandableSectionState
 import io.github.xiaotong6666.uihelper.chrome.AdaptiveNavigationShell
 import io.github.xiaotong6666.uihelper.chrome.NavigationShellBackBehavior
 import io.github.xiaotong6666.uihelper.chrome.NavigationShellItem
+import io.github.xiaotong6666.uihelper.chrome.NavigationShellPageSyncMode
 import io.github.xiaotong6666.uihelper.common.StatusTag
 import io.github.xiaotong6666.uihelper.dialog.AdaptiveDecisionDialog
 import io.github.xiaotong6666.uihelper.dialog.AdaptiveDetailsDialog
@@ -62,6 +63,7 @@ fun ReusableConsumer() {
             onSelectedIndexChange = {},
             navigationRail = false,
             swipeNavigationEnabled = false,
+            pageSyncMode = NavigationShellPageSyncMode.VisiblePage,
             backBehavior = NavigationShellBackBehavior.Disabled,
         ) { _, _, _, _ ->
             Column {

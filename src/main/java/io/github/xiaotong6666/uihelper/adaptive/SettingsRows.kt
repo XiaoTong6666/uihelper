@@ -79,7 +79,7 @@ private val NativeSettingsItemInset = 16.dp
 private val NativeSettingsItemPadding = PaddingValues(horizontal = NativeSettingsItemInset, vertical = 14.dp)
 
 /**
- * KSU/InstallerX-style settings section with a native MIUIX title and an M3E compact section title.
+ * Settings section with a native MIUIX title and an M3E compact section title.
  */
 @Composable
 fun NativeSettingsSection(

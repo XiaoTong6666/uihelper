@@ -173,6 +173,18 @@ enum class NavigationShellTopBarMode {
     Collapsed,
 }
 
+/**
+ * Chooses which pager state drives shell chrome during page transitions.
+ *
+ * [SelectedPage] updates the top bar and navigation selection immediately when a destination is
+ * requested, while the pager animates to that page. [VisiblePage] preserves the physical-page
+ * mode, where shell chrome follows the page currently occupying most of the viewport.
+ */
+enum class NavigationShellPageSyncMode {
+    SelectedPage,
+    VisiblePage,
+}
+
 /** Controls which tab, if any, handles Back. Disabled lets the parent route host handle it. */
 enum class NavigationShellBackBehavior { FirstPage, PreviousPage, Disabled }
 
@@ -283,6 +295,7 @@ fun AdaptiveNavigationShell(
     swipeNavigationEnabled: Boolean = true,
     backBehavior: NavigationShellBackBehavior = NavigationShellBackBehavior.FirstPage,
     onBackRequested: ((currentPage: Int) -> Unit)? = null,
+    pageSyncMode: NavigationShellPageSyncMode = NavigationShellPageSyncMode.SelectedPage,
     content: @Composable (pageIndex: Int, contentPadding: PaddingValues, isCurrentPage: Boolean, pageModifier: Modifier) -> Unit,
 ) {
     if (items.isEmpty()) return
@@ -305,12 +318,11 @@ fun AdaptiveNavigationShell(
         items.getOrNull(settledPage)?.pagerGesturePolicy == NavigationShellPagerGesturePolicy.RegionAware
     val useCustomPagerGestures = swipeNavigationEnabled && !pageUsesRegionAwarePager
     val interceptPagerGestures = useCustomPagerGestures && pagerMode == PagerInterceptionMode.CrossAxisInterceptor
-    // FuseHide's pager fix (d0d727e): chrome must follow the page that is
-    // physically visible, never the optimistic destination set by a tab click.
-    // A tap may start its spring several frames before the pager actually moves.
-    // The fractional pager offset changes every animation frame. Derived state
-    // invalidates the chrome only when the *integer* visible page changes.
-    val activePageIndex by remember(pagerState, items.size) {
+    // Keep the physical-page behavior available for consumers that explicitly want chrome to
+    // follow the viewport during a transition. By default, shellPagerState.selectedPage is updated
+    // immediately by animateToPage(), so navigation chrome reacts to the requested destination
+    // before the pager animation completes.
+    val visiblePageIndex by remember(pagerState, items.size) {
         derivedStateOf {
             visiblePagerPage(
                 currentPage = pagerState.currentPage,
@@ -320,6 +332,16 @@ fun AdaptiveNavigationShell(
                 pageCount = items.size,
             )
         }
+    }
+    val activePageIndex = when (pageSyncMode) {
+        NavigationShellPageSyncMode.SelectedPage ->
+            shellPagerState.selectedPage.coerceIn(0, items.lastIndex)
+
+        NavigationShellPageSyncMode.VisiblePage -> visiblePageIndex
+    }
+    val currentContentPageIndex = when (pageSyncMode) {
+        NavigationShellPageSyncMode.SelectedPage -> settledPage.coerceIn(0, items.lastIndex)
+        NavigationShellPageSyncMode.VisiblePage -> visiblePageIndex
     }
     val activeItem = items[activePageIndex]
     val appChromeState = rememberAppChromeState()
@@ -332,7 +354,13 @@ fun AdaptiveNavigationShell(
     var contentReady by remember { mutableStateOf(false) }
     var navigationRailExpanded by rememberSaveable { mutableStateOf(false) }
     val onPageSelected: (Int) -> Unit = { index ->
-        if (pagerState.isScrollInProgress || settledPage != index) {
+        val shouldNavigate = when (pageSyncMode) {
+            NavigationShellPageSyncMode.SelectedPage -> shellPagerState.selectedPage != index
+
+            NavigationShellPageSyncMode.VisiblePage ->
+                pagerState.isScrollInProgress || settledPage != index
+        }
+        if (shouldNavigate) {
             shellPagerState.animateToPage(index)
         }
     }
@@ -688,7 +716,7 @@ fun AdaptiveNavigationShell(
                                     content(
                                         page,
                                         paddingValues,
-                                        page == activePageIndex,
+                                        page == currentContentPageIndex,
                                         pageModifier,
                                     )
                                 }
@@ -934,7 +962,7 @@ fun AdaptiveNavigationShell(
                                     content(
                                         page,
                                         paddingValues,
-                                        page == activePageIndex,
+                                        page == currentContentPageIndex,
                                         Modifier,
                                     )
                                 }

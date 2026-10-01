@@ -87,7 +87,7 @@ fun StatusHeroCardMiuix(
             color = containerColor,
             contentColor = MiuixTheme.colorScheme.onSurface,
         ),
-        // Match FuseHide HomeStatusCard: the native TiltFeedback rotates toward the
+        // The native TiltFeedback rotates toward the
         // touch position and springs back. Passive status cards have no press feedback.
         onClick = onClick,
         pressFeedbackType = if (onClick != null) PressFeedbackType.Tilt else PressFeedbackType.None,
@@ -112,7 +112,7 @@ fun StatusHeroCardMiuix(
                     )
                     .squircleClip(16.dp),
             ) {
-                // KSU HomeMiuix StatusCard deliberately pushes its decorative signal
+                // Keep the decorative signal pushed
                 // past the bottom/right of the clipped card. A larger structured glyph
                 // follows that treatment, but keeps a little more of its lower interior
                 // visible (e.g. the dot in ErrorOutline must not be cropped).

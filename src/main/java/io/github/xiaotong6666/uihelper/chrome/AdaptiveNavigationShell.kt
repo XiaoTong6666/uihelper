@@ -19,26 +19,26 @@
 package io.github.xiaotong6666.uihelper.chrome
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults.flingBehavior
 import androidx.compose.foundation.pager.PagerDefaults.pageNestedScrollConnection
@@ -65,8 +65,8 @@ import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -78,13 +78,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -108,10 +108,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.anim.folmeSpring
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
-import top.yukonga.miuix.kmp.basic.TopAppBarDefaults as MiuixTopAppBarDefaults
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -130,6 +128,8 @@ import top.yukonga.miuix.kmp.basic.NavigationBar as MiuixNavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem as MiuixNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationRail as MiuixNavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem as MiuixNavigationRailItem
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
+import top.yukonga.miuix.kmp.basic.TopAppBarDefaults as MiuixTopAppBarDefaults
 
 @Stable
 data class NavigationShellAction(
@@ -177,7 +177,7 @@ enum class NavigationShellTopBarMode {
 enum class NavigationShellBackBehavior { FirstPage, PreviousPage, Disabled }
 
 /** A stable one-line native measurement slot; app-owned expanded titles are rendered on top. */
-private const val StableLargeTitleMeasureText = "\u00A0"
+private const val STABLE_LARGE_TITLE_MEASURE_TEXT = "\u00A0"
 
 /** Match MIUIX's native compact-title reveal for a paired large/compact leading glyph. */
 @Composable
@@ -370,11 +370,14 @@ fun AdaptiveNavigationShell(
         state = navigationEventState,
         isBackEnabled = activePageIndex != 0 && (backBehavior != NavigationShellBackBehavior.Disabled || onBackRequested != null),
         onBackCompleted = {
-            if (onBackRequested != null) onBackRequested(activePageIndex)
-            else when (backBehavior) {
-                NavigationShellBackBehavior.FirstPage -> onPageSelected(0)
-                NavigationShellBackBehavior.PreviousPage -> onPageSelected(activePageIndex - 1)
-                NavigationShellBackBehavior.Disabled -> Unit
+            if (onBackRequested != null) {
+                onBackRequested(activePageIndex)
+            } else {
+                when (backBehavior) {
+                    NavigationShellBackBehavior.FirstPage -> onPageSelected(0)
+                    NavigationShellBackBehavior.PreviousPage -> onPageSelected(activePageIndex - 1)
+                    NavigationShellBackBehavior.Disabled -> Unit
+                }
             }
         },
     )
@@ -421,7 +424,7 @@ fun AdaptiveNavigationShell(
                                             // All tabs must have the same one-line measure or switching from a
                                             // wrapped title to a short one changes the shared collapse geometry.
                                             // The actual title (and optional glyph) is drawn in the overlay below.
-                                            largeTitle = StableLargeTitleMeasureText,
+                                            largeTitle = STABLE_LARGE_TITLE_MEASURE_TEXT,
                                             color = miuixChromeColor(blurActive),
                                             titleColor = MiuixTheme.colorScheme.onSurface,
                                             // MIUIX applies this *on both sides* to the compact title as well.
@@ -442,13 +445,15 @@ fun AdaptiveNavigationShell(
                                             actions = {
                                                 if (activeItem.trailingContent != null) {
                                                     activeItem.trailingContent.invoke(this)
-                                                } else activeItem.action?.let { item ->
-                                                    top.yukonga.miuix.kmp.basic.IconButton(onClick = item.onClick) {
-                                                        Icon(
-                                                            imageVector = item.icon,
-                                                            contentDescription = item.contentDescription,
-                                                            tint = MiuixTheme.colorScheme.onSurface,
-                                                        )
+                                                } else {
+                                                    activeItem.action?.let { item ->
+                                                        top.yukonga.miuix.kmp.basic.IconButton(onClick = item.onClick) {
+                                                            Icon(
+                                                                imageVector = item.icon,
+                                                                contentDescription = item.contentDescription,
+                                                                tint = MiuixTheme.colorScheme.onSurface,
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             },
@@ -493,15 +498,17 @@ fun AdaptiveNavigationShell(
                                         actions = {
                                             if (activeItem.trailingContent != null) {
                                                 activeItem.trailingContent.invoke(this)
-                                            } else activeItem.action?.let { item ->
-                                                top.yukonga.miuix.kmp.basic.IconButton(
-                                                    onClick = item.onClick,
-                                                ) {
-                                                    Icon(
-                                                        imageVector = item.icon,
-                                                        contentDescription = item.contentDescription,
-                                                        tint = MiuixTheme.colorScheme.onSurface,
-                                                    )
+                                            } else {
+                                                activeItem.action?.let { item ->
+                                                    top.yukonga.miuix.kmp.basic.IconButton(
+                                                        onClick = item.onClick,
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = item.icon,
+                                                            contentDescription = item.contentDescription,
+                                                            tint = MiuixTheme.colorScheme.onSurface,
+                                                        )
+                                                    }
                                                 }
                                             }
                                         },
@@ -659,10 +666,14 @@ fun AdaptiveNavigationShell(
                                     }
                                 }
                                 val pageHost = remember(pageConnection, isTopBarScrollable) {
-                                    if (isTopBarScrollable) PageHostHandle(
-                                        nestedScrollConnection = pageConnection,
-                                        collapsedFractionProvider = { miuixScrollBehavior.state.collapsedFraction },
-                                    ) else PageHostHandle(collapsedFractionProvider = { 1f })
+                                    if (isTopBarScrollable) {
+                                        PageHostHandle(
+                                            nestedScrollConnection = pageConnection,
+                                            collapsedFractionProvider = { miuixScrollBehavior.state.collapsedFraction },
+                                        )
+                                    } else {
+                                        PageHostHandle(collapsedFractionProvider = { 1f })
+                                    }
                                 }
                                 val pageModifier = if (chromeSpec.consumeOuterScroll || !isTopBarScrollable) {
                                     Modifier
@@ -722,15 +733,17 @@ fun AdaptiveNavigationShell(
                             actions = {
                                 if (activeItem.trailingContent != null) {
                                     activeItem.trailingContent.invoke(this)
-                                } else activeItem.action?.let { item ->
-                                    IconButton(
-                                        onClick = item.onClick,
-                                        colors = materialChromeIconButtonColors(),
-                                    ) {
-                                        Icon(
-                                            imageVector = item.icon,
-                                            contentDescription = item.contentDescription,
-                                        )
+                                } else {
+                                    activeItem.action?.let { item ->
+                                        IconButton(
+                                            onClick = item.onClick,
+                                            colors = materialChromeIconButtonColors(),
+                                        ) {
+                                            Icon(
+                                                imageVector = item.icon,
+                                                contentDescription = item.contentDescription,
+                                            )
+                                        }
                                     }
                                 }
                             },
@@ -745,15 +758,17 @@ fun AdaptiveNavigationShell(
                             actions = {
                                 if (activeItem.trailingContent != null) {
                                     activeItem.trailingContent.invoke(this)
-                                } else activeItem.action?.let { item ->
-                                    IconButton(
-                                        onClick = item.onClick,
-                                        colors = materialChromeIconButtonColors(),
-                                    ) {
-                                        Icon(
-                                            imageVector = item.icon,
-                                            contentDescription = item.contentDescription,
-                                        )
+                                } else {
+                                    activeItem.action?.let { item ->
+                                        IconButton(
+                                            onClick = item.onClick,
+                                            colors = materialChromeIconButtonColors(),
+                                        ) {
+                                            Icon(
+                                                imageVector = item.icon,
+                                                contentDescription = item.contentDescription,
+                                            )
+                                        }
                                     }
                                 }
                             },

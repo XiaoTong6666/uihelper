@@ -38,9 +38,9 @@ import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.adaptive.WrapSafeText
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
+import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 /**
  * Two explicit choices plus a neutral close path.

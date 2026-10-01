@@ -10,7 +10,6 @@
 package io.github.xiaotong6666.uihelper.adaptive
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -21,13 +20,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
@@ -71,9 +71,9 @@ import io.github.xiaotong6666.uihelper.popup.trackPopupMenuPressPosition
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
 
 private val NativeSettingsItemInset = 16.dp
 private val NativeSettingsItemPadding = PaddingValues(horizontal = NativeSettingsItemInset, vertical = 14.dp)
@@ -109,6 +109,7 @@ fun NativeSettingsSection(
                     )
                 }
             }
+
             UiMode.Material -> Row(
                 modifier = Modifier.padding(horizontal = NativeSettingsItemInset),
                 verticalAlignment = Alignment.CenterVertically,
@@ -152,6 +153,7 @@ fun NativeSettingsGroup(
         ) {
             Column(modifier = Modifier.fillMaxWidth(), content = content)
         }
+
         UiMode.Material -> Column(
             modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
@@ -245,6 +247,7 @@ fun NativeSettingsItem(
                 supportingContent?.invoke()
             }
         }
+
         UiMode.Material -> {
             val materialSupporting: (@Composable () -> Unit)? = if (supportingContent == null) {
                 null
@@ -318,6 +321,7 @@ fun NativeSettingsToggleItem(
             icon = icon,
             onToggle = { onCheckedChange(!checked) },
         )
+
         UiMode.Material -> {
             val shapes = materialShapes ?: NativeSettingsItemShapes(index = 0, count = 1)
             NativeSettingsItem(
@@ -383,6 +387,7 @@ fun NativeSettingsDropdownItem(
             icon = icon,
             onItemSelected = onItemSelected,
         )
+
         UiMode.Material -> {
             var expanded by remember { mutableStateOf(false) }
             var anchorOffset by remember { mutableStateOf(IntOffset.Zero) }

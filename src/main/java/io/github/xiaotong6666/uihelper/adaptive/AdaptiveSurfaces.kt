@@ -3,6 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  */
 @file:Suppress("ktlint:standard:function-naming")
+
 package io.github.xiaotong6666.uihelper.adaptive
 
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
 import top.yukonga.miuix.kmp.basic.CardDefaults as MiuixCardDefaults
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class AdaptiveSurfaceTone {
     Low,
@@ -35,6 +36,7 @@ fun adaptiveSurfaceColor(tone: AdaptiveSurfaceTone): Color = when (LocalUiMode.c
         AdaptiveSurfaceTone.High -> MaterialTheme.colorScheme.surfaceContainerHigh
         AdaptiveSurfaceTone.Highest -> MaterialTheme.colorScheme.surfaceContainerHighest
     }
+
     UiMode.Miuix -> when (tone) {
         AdaptiveSurfaceTone.Low -> MiuixTheme.colorScheme.surfaceContainer
         AdaptiveSurfaceTone.High -> MiuixTheme.colorScheme.surfaceContainerHigh
@@ -60,6 +62,7 @@ fun AdaptiveTonalSurface(
         ) {
             Column(modifier = Modifier.padding(contentPadding)) { content() }
         }
+
         UiMode.Miuix -> MiuixCard(
             modifier = modifier,
             cornerRadius = miuixCornerRadius,

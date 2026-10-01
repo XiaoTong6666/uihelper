@@ -1,12 +1,15 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package test.consumer
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import io.github.xiaotong6666.uihelper.adaptive.ExpandableSectionBody
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveClickableCard
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveIconLabelChip
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveLabelChip
@@ -14,6 +17,7 @@ import io.github.xiaotong6666.uihelper.adaptive.AdaptiveMetricChip
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveSummaryCard
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveSurfaceTone
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveTonalSurface
+import io.github.xiaotong6666.uihelper.adaptive.ExpandableSectionBody
 import io.github.xiaotong6666.uihelper.adaptive.LabeledValueLayout
 import io.github.xiaotong6666.uihelper.adaptive.LabeledValueMode
 import io.github.xiaotong6666.uihelper.adaptive.WrapSafeText
@@ -28,14 +32,13 @@ import io.github.xiaotong6666.uihelper.miuix.primitive.StatusHeroCardMiuix
 import io.github.xiaotong6666.uihelper.mode.AdaptiveTheme
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import io.github.xiaotong6666.uihelper.navigation3.rememberNavigator
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Home
 import kotlinx.serialization.Serializable
 import top.yukonga.miuix.kmp.nav.core.NavKey
 
 @Serializable
 sealed interface DemoRoute : NavKey {
     @Serializable data object Home : DemoRoute
+
     @Serializable data object Details : DemoRoute
 }
 

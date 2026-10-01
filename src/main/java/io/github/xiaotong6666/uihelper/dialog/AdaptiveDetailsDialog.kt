@@ -3,6 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  */
 @file:Suppress("ktlint:standard:function-naming")
+
 package io.github.xiaotong6666.uihelper.dialog
 
 import androidx.compose.foundation.layout.Arrangement
@@ -31,8 +32,8 @@ import androidx.compose.ui.window.Dialog
 import io.github.xiaotong6666.uihelper.adaptive.WrapSafeText
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
-import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * Native details-dialog shell with an app-owned body.

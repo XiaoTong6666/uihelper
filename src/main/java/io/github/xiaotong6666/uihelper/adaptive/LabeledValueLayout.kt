@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package io.github.xiaotong6666.uihelper.adaptive
 
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +30,9 @@ fun LabeledValueLayout(
         // Stacked skips them entirely (e.g. nested custom Layout or lazy content).
         val labelWidth = if (mode == LabeledValueMode.Auto) labelMeasurable.maxIntrinsicWidth(Constraints.Infinity) else 0
         val valueWidth = if (mode == LabeledValueMode.Auto) valueMeasurable.maxIntrinsicWidth(Constraints.Infinity) else 0
-        val width = if (constraints.hasBoundedWidth) constraints.maxWidth else {
+        val width = if (constraints.hasBoundedWidth) {
+            constraints.maxWidth
+        } else {
             (labelWidth.toLong() + gap + valueWidth).coerceAtMost(Constraints.Infinity.toLong()).toInt()
         }
         if (mode == LabeledValueMode.Auto && labelWidth.toLong() + gap + valueWidth <= width.toLong()) {

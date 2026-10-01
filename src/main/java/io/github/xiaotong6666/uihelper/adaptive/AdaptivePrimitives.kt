@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandMore
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
@@ -44,8 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,24 +53,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.CardDefaults as MiuixCardDefaults
-import top.yukonga.miuix.kmp.basic.Button as MiuixButton
-import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
-import top.yukonga.miuix.kmp.basic.HorizontalDivider as MiuixHorizontalDivider
-import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
-import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
-import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator as MiuixInfiniteProgressIndicator
-import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
-import top.yukonga.miuix.kmp.basic.VerticalDivider as MiuixVerticalDivider
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.basic.Button as MiuixButton
+import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card as MiuixCard
+import top.yukonga.miuix.kmp.basic.CardDefaults as MiuixCardDefaults
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.HorizontalDivider as MiuixHorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
+import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator as MiuixInfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.basic.VerticalDivider as MiuixVerticalDivider
 
 /**
  * Small escape hatch for genuinely app-specific structural differences.
@@ -109,6 +109,7 @@ fun AdaptiveText(
             overflow = overflow,
             softWrap = softWrap,
         )
+
         UiMode.Miuix -> MiuixText(
             text = text,
             modifier = modifier,
@@ -218,6 +219,7 @@ fun AdaptiveFilledIconButton(
             ),
             content = content,
         )
+
         UiMode.Miuix -> MiuixIconButton(
             onClick = onClick,
             modifier = modifier,
@@ -247,6 +249,7 @@ fun AdaptiveButton(
             contentPadding = materialContentPadding,
             content = content,
         )
+
         UiMode.Miuix -> MiuixButton(
             onClick = onClick,
             modifier = modifier,
@@ -275,6 +278,7 @@ fun AdaptiveTonalButton(
             enabled = enabled,
             content = content,
         )
+
         UiMode.Miuix -> MiuixButton(
             onClick = onClick,
             modifier = modifier,
@@ -300,6 +304,7 @@ fun AdaptiveTextButton(
         ) {
             WrapSafeText(text = text)
         }
+
         UiMode.Miuix -> MiuixTextButton(
             text = text,
             onClick = onClick,
@@ -334,6 +339,7 @@ fun AdaptiveCardSurface(
                 Column(modifier = Modifier.padding(contentPadding), content = content)
             }
         }
+
         UiMode.Miuix -> {
             val colors = if (miuixContainerColor == Color.Unspecified) {
                 MiuixCardDefaults.defaultColors()
@@ -397,6 +403,7 @@ fun AdaptiveHorizontalDivider(
         } else {
             HorizontalDivider(modifier = modifier, thickness = materialThickness, color = materialColor)
         }
+
         UiMode.Miuix -> if (miuixColor == Color.Unspecified) {
             MiuixHorizontalDivider(modifier = modifier, thickness = miuixThickness)
         } else {
@@ -418,6 +425,7 @@ fun AdaptiveVerticalDivider(
         } else {
             VerticalDivider(modifier = modifier, thickness = thickness, color = materialColor)
         }
+
         UiMode.Miuix -> if (miuixColor == Color.Unspecified) {
             MiuixVerticalDivider(modifier = modifier, thickness = thickness)
         } else {
@@ -439,6 +447,7 @@ fun AdaptiveCircularProgressIndicator(
             modifier = modifier.size(materialSize),
             strokeWidth = materialStrokeWidth,
         )
+
         UiMode.Miuix -> MiuixCircularProgressIndicator(modifier = modifier, size = miuixSize)
     }
 }
@@ -455,6 +464,7 @@ fun AdaptiveInfiniteProgressIndicator(
             modifier = modifier.size(size),
             strokeWidth = materialStrokeWidth,
         )
+
         UiMode.Miuix -> MiuixInfiniteProgressIndicator(modifier = modifier, size = size)
     }
 }
@@ -487,6 +497,7 @@ fun AdaptiveExpandIcon(
                 tint = materialTint,
             )
         }
+
         UiMode.Miuix -> MiuixIcon(
             imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
             contentDescription = contentDescription,

@@ -12,7 +12,10 @@ internal fun visiblePagerPage(
 ): Int {
     if (pageCount <= 0) return 0
     return (
-        if (isScrollInProgress) (currentPage + currentPageOffsetFraction).roundToInt()
-        else settledPage
-    ).coerceIn(0, pageCount - 1)
+        if (isScrollInProgress) {
+            (currentPage + currentPageOffsetFraction).roundToInt()
+        } else {
+            settledPage
+        }
+        ).coerceIn(0, pageCount - 1)
 }

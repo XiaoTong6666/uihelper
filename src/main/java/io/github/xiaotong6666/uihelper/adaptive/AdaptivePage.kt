@@ -18,6 +18,7 @@
 
 package io.github.xiaotong6666.uihelper.adaptive
 
+import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,18 +45,16 @@ fun Modifier.adaptiveVerticalScrollFeedback(): Modifier = when (LocalUiMode.curr
 }
 
 @Composable
-fun Modifier.adaptiveViewportOverscroll(materialEffect: OverscrollEffect?): Modifier =
-    when (LocalUiMode.current) {
-        UiMode.Miuix -> this
-        UiMode.Material -> if (materialEffect != null) this.overscroll(materialEffect) else this
-    }
+fun Modifier.adaptiveViewportOverscroll(materialEffect: OverscrollEffect?): Modifier = when (LocalUiMode.current) {
+    UiMode.Miuix -> this
+    UiMode.Material -> if (materialEffect != null) this.overscroll(materialEffect) else this
+}
 
 @Composable
-fun adaptiveScrollableOverscrollEffect(materialEffect: OverscrollEffect?): OverscrollEffect? =
-    when (LocalUiMode.current) {
-        UiMode.Miuix -> null
-        UiMode.Material -> materialEffect
-    }
+fun adaptiveScrollableOverscrollEffect(materialEffect: OverscrollEffect?): OverscrollEffect? = when (LocalUiMode.current) {
+    UiMode.Miuix -> null
+    UiMode.Material -> materialEffect
+}
 
 @Composable
 fun AdaptiveScrollColumn(

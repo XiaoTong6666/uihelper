@@ -3,6 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  */
 @file:Suppress("ktlint:standard:function-naming")
+
 package io.github.xiaotong6666.uihelper.adaptive
 
 import androidx.compose.runtime.Composable

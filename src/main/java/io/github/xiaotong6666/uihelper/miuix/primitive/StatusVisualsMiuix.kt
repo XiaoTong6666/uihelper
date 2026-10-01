@@ -102,9 +102,13 @@ fun StatusHeroCardMiuix(
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(
-                        if (structured) Modifier else Modifier.heightIn(
-                            min = if (footer == null) 136.dp else 108.dp,
-                        ),
+                        if (structured) {
+                            Modifier
+                        } else {
+                            Modifier.heightIn(
+                                min = if (footer == null) 136.dp else 108.dp,
+                            )
+                        },
                     )
                     .squircleClip(16.dp),
             ) {
@@ -132,7 +136,13 @@ fun StatusHeroCardMiuix(
                                 start = 20.dp,
                                 top = 20.dp,
                                 end = if (structured) 20.dp else 94.dp,
-                                bottom = if (structured) 0.dp else if (footer == null) 24.dp else 14.dp,
+                                bottom = if (structured) {
+                                    0.dp
+                                } else if (footer == null) {
+                                    24.dp
+                                } else {
+                                    14.dp
+                                },
                             ),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {

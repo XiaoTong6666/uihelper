@@ -14,18 +14,13 @@ internal class ActivePageNestedScrollConnection(
     private val delegate: NestedScrollConnection,
     private val isActive: () -> Boolean,
 ) : NestedScrollConnection {
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset =
-        if (isActive()) delegate.onPreScroll(available, source) else Offset.Zero
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset = if (isActive()) delegate.onPreScroll(available, source) else Offset.Zero
 
-    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
-        if (isActive()) delegate.onPostScroll(consumed, available, source) else Offset.Zero
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset = if (isActive()) delegate.onPostScroll(consumed, available, source) else Offset.Zero
 
-    override suspend fun onPreFling(available: Velocity): Velocity =
-        if (isActive()) delegate.onPreFling(available) else Velocity.Zero
+    override suspend fun onPreFling(available: Velocity): Velocity = if (isActive()) delegate.onPreFling(available) else Velocity.Zero
 
-    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
-        if (isActive()) delegate.onPostFling(consumed, available) else Velocity.Zero
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = if (isActive()) delegate.onPostFling(consumed, available) else Velocity.Zero
 }
 
-internal fun isActivePageScrollOwner(page: Int, visiblePage: Int, isPagerScrolling: Boolean): Boolean =
-    !isPagerScrolling && page == visiblePage
+internal fun isActivePageScrollOwner(page: Int, visiblePage: Int, isPagerScrolling: Boolean): Boolean = !isPagerScrolling && page == visiblePage

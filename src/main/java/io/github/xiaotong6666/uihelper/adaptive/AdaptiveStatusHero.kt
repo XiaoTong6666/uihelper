@@ -62,9 +62,11 @@ fun AdaptiveStatusHeroCard(
         UiMode.Miuix -> {
             val containerColor = when (tone) {
                 StatusHeroTone.Danger -> MiuixTheme.colorScheme.errorContainer
+
                 StatusHeroTone.Warning,
                 StatusHeroTone.Success,
                 -> lerp(MiuixTheme.colorScheme.surfaceContainer, accentColor, 0.15f)
+
                 StatusHeroTone.Neutral -> MiuixTheme.colorScheme.surfaceContainerHighest
             }
             val resolvedAccent = if (tone == StatusHeroTone.Danger) MiuixTheme.colorScheme.error else accentColor
@@ -81,6 +83,7 @@ fun AdaptiveStatusHeroCard(
                 actionContent = actionContent?.let { content -> { content(contentColor) } },
             )
         }
+
         UiMode.Material -> {
             val containerColor = when (tone) {
                 StatusHeroTone.Danger -> MaterialTheme.colorScheme.errorContainer

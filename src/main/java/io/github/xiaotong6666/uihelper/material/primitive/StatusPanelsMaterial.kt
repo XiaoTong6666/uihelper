@@ -103,12 +103,16 @@ fun HomeStatusCardMaterial(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    val containerColor = if (checking) MaterialTheme.colorScheme.surfaceBright else if (healthy) {
+    val containerColor = if (checking) {
+        MaterialTheme.colorScheme.surfaceBright
+    } else if (healthy) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
         MaterialTheme.colorScheme.errorContainer
     }
-    val contentColor = if (checking) MaterialTheme.colorScheme.onSurface else if (healthy) {
+    val contentColor = if (checking) {
+        MaterialTheme.colorScheme.onSurface
+    } else if (healthy) {
         MaterialTheme.colorScheme.onSecondaryContainer
     } else {
         MaterialTheme.colorScheme.onErrorContainer

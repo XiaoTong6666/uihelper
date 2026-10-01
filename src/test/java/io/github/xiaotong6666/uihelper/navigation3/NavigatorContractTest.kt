@@ -13,8 +13,13 @@ import top.yukonga.miuix.kmp.nav.core.navBackStackOf
 class NavigatorContractTest {
     @Serializable
     private sealed interface Route : NavKey {
-        @Serializable @SerialName("start") data object Start : Route
-        @Serializable @SerialName("details") data object Details : Route
+        @Serializable
+        @SerialName("start")
+        data object Start : Route
+
+        @Serializable
+        @SerialName("details")
+        data object Details : Route
     }
 
     @Test fun duplicatePolicyIsExplicit() {
@@ -35,7 +40,9 @@ class NavigatorContractTest {
         navigator.push(Route.Details)
         navigator.push(Route.Details)
         val saver = navigatorBackStackSaver(ListSerializer(Route.serializer()))
-        val scope = object : SaverScope { override fun canBeSaved(value: Any): Boolean = true }
+        val scope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
         val encoded = with(saver) { scope.save(navigator.backStack) }
         assertNotNull(encoded)
         val restored = saver.restore(requireNotNull(encoded))

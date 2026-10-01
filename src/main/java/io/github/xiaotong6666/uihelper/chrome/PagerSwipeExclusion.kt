@@ -35,8 +35,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.boundsInRoot
@@ -83,7 +83,6 @@ internal class PagerSwipeExclusionRegistry {
     fun contains(page: Int, positionInRoot: Offset): Boolean = regions.any { (owner, bounds) ->
         ownerPages[owner] == page && positionInRoot in bounds
     }
-
 }
 
 internal val LocalPagerSwipeExclusionRegistry = compositionLocalOf<PagerSwipeExclusionRegistry?> { null }
@@ -171,7 +170,11 @@ internal fun Modifier.pagerSwipeExclusionHost(
 
                         val directionSign = if (
                             (layoutDirection == LayoutDirection.Rtl) xor pagerState.layoutInfo.reverseLayout
-                        ) 1f else -1f
+                        ) {
+                            1f
+                        } else {
+                            -1f
+                        }
 
                         val events = Channel<PagerMotionEvent>(Channel.UNLIMITED)
                         motionJob = gestureScope.launch(start = CoroutineStart.UNDISPATCHED) {
@@ -179,6 +182,7 @@ internal fun Modifier.pagerSwipeExclusionHost(
                                 for (motionEvent in events) {
                                     when (motionEvent) {
                                         is PagerMotionEvent.Delta -> scrollBy(motionEvent.x * directionSign)
+
                                         is PagerMotionEvent.Finish -> {
                                             val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
                                             val signedVelocity = motionEvent.velocityX * directionSign

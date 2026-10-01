@@ -1,6 +1,9 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package io.github.xiaotong6666.uihelper.adaptive
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -15,7 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.animation.core.VisibilityThreshold
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.anim.folmeSpring

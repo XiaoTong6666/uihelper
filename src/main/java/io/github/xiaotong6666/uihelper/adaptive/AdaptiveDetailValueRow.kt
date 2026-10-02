@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -97,49 +98,48 @@ fun AdaptiveDetailValueRow(
             }
         },
         material = {
-            Column(
-                modifier = modifier.fillMaxWidth().padding(vertical = materialVerticalPadding),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .padding(vertical = materialVerticalPadding),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                LabeledValueLayout(
-                    label = {
-                        WrapSafeText(
-                            text = label,
-                            style = materialLabelStyle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    },
-                    value = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = iconTint,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            WrapSafeText(
-                                text = value,
-                                modifier = valueModifier,
-                                style = materialValueStyle,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    },
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.padding(top = 2.dp).size(18.dp),
                 )
-                detail?.takeIf { it.isNotBlank() }?.let { raw ->
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
                     WrapSafeText(
-                        text = raw,
+                        text = label,
                         modifier = Modifier.fillMaxWidth(),
-                        style = if (detailMonospace) {
-                            materialDetailStyle.copy(fontFamily = FontFamily.Monospace)
-                        } else {
-                            materialDetailStyle
-                        },
+                        style = materialLabelStyle,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    WrapSafeText(
+                        text = value,
+                        modifier = Modifier.fillMaxWidth().then(valueModifier),
+                        style = materialValueStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    detail?.takeIf { it.isNotBlank() }?.let { raw ->
+                        WrapSafeText(
+                            text = raw,
+                            modifier = Modifier.fillMaxWidth(),
+                            style = if (detailMonospace) {
+                                materialDetailStyle.copy(fontFamily = FontFamily.Monospace)
+                            } else {
+                                materialDetailStyle
+                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         },

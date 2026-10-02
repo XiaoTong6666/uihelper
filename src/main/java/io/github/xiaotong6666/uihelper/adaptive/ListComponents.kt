@@ -46,10 +46,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import androidx.compose.ui.unit.sp
 import io.github.xiaotong6666.uihelper.material.primitive.TonalCardMaterial
 import io.github.xiaotong6666.uihelper.miuix.primitive.SectionDescriptionMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.basic.Card

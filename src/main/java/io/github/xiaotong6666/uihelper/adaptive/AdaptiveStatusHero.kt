@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.miuix.primitive.MiuixHeroIconMode
 import io.github.xiaotong6666.uihelper.miuix.primitive.StatusHeroCardMiuix
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
@@ -57,6 +58,7 @@ fun AdaptiveStatusHeroCard(
     onClick: (() -> Unit)? = null,
     metaContent: (@Composable ColumnScope.(contentColor: Color) -> Unit)? = null,
     actionContent: (@Composable ColumnScope.(contentColor: Color) -> Unit)? = null,
+    miuixHeroIconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
 ) {
     when (LocalUiMode.current) {
         UiMode.Miuix -> {
@@ -81,6 +83,7 @@ fun AdaptiveStatusHeroCard(
                 onClick = onClick,
                 metaContent = metaContent?.let { content -> { content(contentColor) } },
                 actionContent = actionContent?.let { content -> { content(contentColor) } },
+                iconMode = miuixHeroIconMode,
             )
         }
 
@@ -92,7 +95,7 @@ fun AdaptiveStatusHeroCard(
                 StatusHeroTone.Neutral -> MaterialTheme.colorScheme.surfaceContainerHigh
             }
             val contentColor = when (tone) {
-                StatusHeroTone.Danger -> MaterialTheme.colorScheme.onErrorContainer
+                StatusHeroTone.Danger -> Color.White
                 StatusHeroTone.Warning -> MaterialTheme.colorScheme.onTertiaryContainer
                 StatusHeroTone.Success -> MaterialTheme.colorScheme.onSecondaryContainer
                 StatusHeroTone.Neutral -> MaterialTheme.colorScheme.onSurface
@@ -109,7 +112,7 @@ fun AdaptiveStatusHeroCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 10.dp),
+                            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
@@ -127,7 +130,7 @@ fun AdaptiveStatusHeroCard(
                         ) {
                             Text(
                                 text = title,
-                                style = MaterialTheme.typography.titleLargeEmphasized,
+                                style = MaterialTheme.typography.titleMediumEmphasized,
                                 color = contentColor,
                             )
                             Text(
@@ -141,7 +144,7 @@ fun AdaptiveStatusHeroCard(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 12.dp),
+                                .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
                         ) { content(contentColor) }
                     }
                     actionContent?.let { content ->

@@ -101,9 +101,9 @@ import io.github.xiaotong6666.uihelper.miuix.effect.LocalMiuixBlurBackdrop
 import io.github.xiaotong6666.uihelper.miuix.effect.MiuixBlurredChrome
 import io.github.xiaotong6666.uihelper.miuix.effect.miuixChromeColor
 import io.github.xiaotong6666.uihelper.miuix.effect.rememberMiuixBlurBackdrop
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
-import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin

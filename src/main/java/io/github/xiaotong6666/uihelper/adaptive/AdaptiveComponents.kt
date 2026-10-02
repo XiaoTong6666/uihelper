@@ -61,6 +61,7 @@ import io.github.xiaotong6666.uihelper.miuix.primitive.InfoBannerMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.InfoPanelMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.InlineTextButtonMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.MetricCardMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.MiuixHeroIconMode
 import io.github.xiaotong6666.uihelper.miuix.primitive.MonospaceBlockMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.PrimaryActionButtonMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.RuntimeSummaryCardMiuix
@@ -328,9 +329,20 @@ fun HomeStatusCard(
     checking: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    miuixHeroIconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
 ) {
     when (LocalUiMode.current) {
-        UiMode.Miuix -> HomeStatusCardMiuix(title, summary, footer, healthy, checking, modifier, onClick)
+        UiMode.Miuix -> HomeStatusCardMiuix(
+            title = title,
+            summary = summary,
+            footer = footer,
+            healthy = healthy,
+            checking = checking,
+            modifier = modifier,
+            onClick = onClick,
+            iconMode = miuixHeroIconMode,
+        )
+
         UiMode.Material -> HomeStatusCardMaterial(title, summary, footer, healthy, checking, modifier, onClick)
     }
 }

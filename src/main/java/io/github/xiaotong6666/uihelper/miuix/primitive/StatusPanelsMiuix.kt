@@ -38,6 +38,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -134,6 +137,7 @@ fun HomeStatusCardMiuix(
     checking: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    iconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
 ) {
     val containerColor = when {
         checking -> MiuixTheme.colorScheme.surfaceContainerHighest
@@ -170,7 +174,15 @@ fun HomeStatusCardMiuix(
                 ) {
                     Icon(
                         modifier = Modifier.size(110.dp),
-                        imageVector = if (healthy) MiuixIcons.Ok else MiuixIcons.Report,
+                        imageVector = when (iconMode) {
+                            MiuixHeroIconMode.Preserve -> {
+                                if (healthy) Icons.Rounded.CheckCircleOutline else Icons.Rounded.ErrorOutline
+                            }
+
+                            MiuixHeroIconMode.Native -> {
+                                if (healthy) MiuixIcons.Ok else MiuixIcons.Report
+                            }
+                        },
                         tint = if (checking) {
                             Color.Transparent
                         } else if (healthy) {

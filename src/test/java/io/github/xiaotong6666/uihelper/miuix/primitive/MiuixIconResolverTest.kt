@@ -2,10 +2,10 @@ package io.github.xiaotong6666.uihelper.miuix.primitive
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.SettingsSuggest
+import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.rounded.SettingsSuggest
 import androidx.compose.material.icons.rounded.Wifi
 import org.junit.Assert.assertSame
 import org.junit.Test

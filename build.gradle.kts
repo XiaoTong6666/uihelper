@@ -103,7 +103,7 @@ dependencies {
     implementation(libs.miuix.preference)
     // NavKey/NavBackStack and the public inline Saver contract cross the AAR API boundary.
     api(libs.miuix.nav)
-    // Root builds (e.g. FuseHide) use their own version catalog, not this
+    // Root builds use their own version catalog, not this
     // standalone project's libs. Keep this public inline dependency explicit.
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 

@@ -45,6 +45,11 @@ import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
+enum class MiuixHeroIconMode {
+    Preserve,
+    Native,
+}
+
 /** Short status text using the native MIUIX badge, not a Material chip painted with MIUIX colors. */
 @Composable
 fun StatusLabelBadgeMiuix(
@@ -80,6 +85,7 @@ fun StatusHeroCardMiuix(
     footer: (@Composable ColumnScope.() -> Unit)? = null,
     metaContent: (@Composable ColumnScope.() -> Unit)? = null,
     actionContent: (@Composable ColumnScope.() -> Unit)? = null,
+    iconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -117,7 +123,10 @@ fun StatusHeroCardMiuix(
                 // follows that treatment, but keeps a little more of its lower interior
                 // visible (e.g. the dot in ErrorOutline must not be cropped).
                 Icon(
-                    imageVector = resolveMiuixIcon(icon),
+                    imageVector = when (iconMode) {
+                        MiuixHeroIconMode.Preserve -> icon
+                        MiuixHeroIconMode.Native -> resolveMiuixIcon(icon)
+                    },
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -127,15 +136,15 @@ fun StatusHeroCardMiuix(
                 )
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
-                                start = 20.dp,
-                                top = 20.dp,
-                                end = if (structured) 20.dp else 94.dp,
+                                start = 16.dp,
+                                top = 16.dp,
+                                end = if (structured) 16.dp else 94.dp,
                                 bottom = if (structured) {
                                     0.dp
                                 } else if (footer == null) {
@@ -144,7 +153,7 @@ fun StatusHeroCardMiuix(
                                     14.dp
                                 },
                             ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         Text(
                             text = title,
@@ -167,8 +176,8 @@ fun StatusHeroCardMiuix(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 20.dp, end = 108.dp, top = 6.dp, bottom = 5.dp),
-                            verticalArrangement = Arrangement.spacedBy(5.dp),
+                                .padding(start = 16.dp, end = 108.dp, top = 4.dp, bottom = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                             content = metaContent,
                         )
                     }

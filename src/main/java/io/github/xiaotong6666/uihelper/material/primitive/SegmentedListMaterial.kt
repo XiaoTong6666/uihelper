@@ -53,12 +53,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import io.github.xiaotong6666.uihelper.common.SegmentedGeometry
 import io.github.xiaotong6666.uihelper.material.materialSurfaceLadder
 import kotlin.math.roundToInt
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
-private val SEGMENTED_OUTER_RADIUS = 16.dp
-private val SEGMENTED_INNER_RADIUS = 4.dp
 private const val SEGMENTED_SPRING_STIFFNESS = 800f
 private const val SEGMENTED_SPRING_DAMPING = 0.9f
 
@@ -177,12 +176,12 @@ fun SegmentedColumn(
                         val isLast = if (lastVisible == -1) index == entries.lastIndex else index == lastVisible
 
                         val topRadius by animateDpAsState(
-                            if (isFirst) SEGMENTED_OUTER_RADIUS else SEGMENTED_INNER_RADIUS,
+                            if (isFirst) SegmentedGeometry.OuterRadius else SegmentedGeometry.InnerRadius,
                             dpSpring,
                             label = "SegmentedTopRadius",
                         )
                         val bottomRadius by animateDpAsState(
-                            if (isLast) SEGMENTED_OUTER_RADIUS else SEGMENTED_INNER_RADIUS,
+                            if (isLast) SegmentedGeometry.OuterRadius else SegmentedGeometry.InnerRadius,
                             dpSpring,
                             label = "SegmentedBottomRadius",
                         )

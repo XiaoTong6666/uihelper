@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveClickableCard
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveIconLabelChip
+import io.github.xiaotong6666.uihelper.adaptive.AdaptiveInteractiveCardSurface
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveLabelChip
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveMetricChip
+import io.github.xiaotong6666.uihelper.adaptive.AdaptiveSectionGroup
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveSummaryCard
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveSurfaceTone
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveTonalSurface
@@ -21,6 +23,7 @@ import io.github.xiaotong6666.uihelper.adaptive.ExpandableSectionBody
 import io.github.xiaotong6666.uihelper.adaptive.LabeledValueLayout
 import io.github.xiaotong6666.uihelper.adaptive.LabeledValueMode
 import io.github.xiaotong6666.uihelper.adaptive.WrapSafeText
+import io.github.xiaotong6666.uihelper.adaptive.adaptiveInsetSurfaceColor
 import io.github.xiaotong6666.uihelper.adaptive.rememberExpandableSectionState
 import io.github.xiaotong6666.uihelper.chrome.AdaptiveNavigationShell
 import io.github.xiaotong6666.uihelper.chrome.NavigationShellBackBehavior
@@ -29,9 +32,13 @@ import io.github.xiaotong6666.uihelper.chrome.NavigationShellPageSyncMode
 import io.github.xiaotong6666.uihelper.common.StatusTag
 import io.github.xiaotong6666.uihelper.dialog.AdaptiveDecisionDialog
 import io.github.xiaotong6666.uihelper.dialog.AdaptiveDetailsDialog
+import io.github.xiaotong6666.uihelper.dialog.rememberRetainedDialogPayload
 import io.github.xiaotong6666.uihelper.miuix.primitive.StatusHeroCardMiuix
+import io.github.xiaotong6666.uihelper.mode.AdaptiveInteractionRuntime
 import io.github.xiaotong6666.uihelper.mode.AdaptiveTheme
 import io.github.xiaotong6666.uihelper.mode.UiMode
+import io.github.xiaotong6666.uihelper.mode.materialCompatibilityColorSchemeFromMiuix
+import io.github.xiaotong6666.uihelper.navigation3.logicalBackSwipeDirection
 import io.github.xiaotong6666.uihelper.navigation3.rememberNavigator
 import kotlinx.serialization.Serializable
 import top.yukonga.miuix.kmp.nav.core.NavKey
@@ -47,81 +54,91 @@ sealed interface DemoRoute : NavKey {
 fun ReusableConsumer() {
     val routes = rememberNavigator<DemoRoute>(DemoRoute.Home)
     AdaptiveTheme(uiMode = UiMode.Material, darkTheme = false, materialColorScheme = lightColorScheme()) {
-        val expanded = rememberExpandableSectionState(identity = "stable-section")
-        AdaptiveNavigationShell(
-            items = listOf(
-                NavigationShellItem(
-                    title = "Home",
-                    icon = Icons.Rounded.Home,
-                    compactTopBarTitle = "Home",
-                    leadingContent = { Text("L") },
-                    largeTitleLeadingContent = { Text("Brand") },
-                    trailingContent = { Text("Action") },
+        AdaptiveInteractionRuntime {
+            val expanded = rememberExpandableSectionState(identity = "stable-section")
+            val retainedPayload = rememberRetainedDialogPayload("payload")
+            materialCompatibilityColorSchemeFromMiuix(lightColorScheme())
+            adaptiveInsetSurfaceColor()
+            logicalBackSwipeDirection()
+            AdaptiveNavigationShell(
+                items = listOf(
+                    NavigationShellItem(
+                        title = "Home",
+                        icon = Icons.Rounded.Home,
+                        compactTopBarTitle = "Home",
+                        leadingContent = { Text("L") },
+                        largeTitleLeadingContent = { Text("Brand") },
+                        trailingContent = { Text("Action") },
+                    ),
                 ),
-            ),
-            selectedIndex = 0,
-            onSelectedIndexChange = {},
-            navigationRail = false,
-            swipeNavigationEnabled = false,
-            pageSyncMode = NavigationShellPageSyncMode.VisiblePage,
-            backBehavior = NavigationShellBackBehavior.Disabled,
-        ) { _, _, _, _ ->
-            Column {
-                WrapSafeText("very_long_identifier_abcdefghijklmnopqrstuvwxyz")
-                LabeledValueLayout(
-                    label = { Text("Label") },
-                    value = { Text("Value") },
-                    mode = LabeledValueMode.Stacked,
-                )
-                StatusTag("Ready", backgroundColor = Color.Green, contentColor = Color.Black)
-                Button(onClick = expanded::toggle) { Text("Toggle details") }
-                Button(onClick = { routes.pushSingleTop(DemoRoute.Details) }) { Text("Open details") }
-                ExpandableSectionBody(expanded = expanded.expanded) { Text("More") }
-                AdaptiveSummaryCard(
-                    icon = Icons.Rounded.Home,
-                    title = "Inventory",
-                    summary = "Reusable summary",
-                    trailingText = "3",
-                )
-                AdaptiveClickableCard(onClick = {}) {
-                    Text("Clickable adaptive card")
+                selectedIndex = 0,
+                onSelectedIndexChange = {},
+                navigationRail = false,
+                swipeNavigationEnabled = false,
+                pageSyncMode = NavigationShellPageSyncMode.VisiblePage,
+                backBehavior = NavigationShellBackBehavior.Disabled,
+            ) { _, _, _, _ ->
+                Column {
+                    WrapSafeText("very_long_identifier_abcdefghijklmnopqrstuvwxyz")
+                    LabeledValueLayout(
+                        label = { Text("Label") },
+                        value = { Text("Value") },
+                        mode = LabeledValueMode.Stacked,
+                    )
+                    StatusTag("Ready", backgroundColor = Color.Green, contentColor = Color.Black)
+                    Button(onClick = expanded::toggle) { Text("Toggle details") }
+                    Button(onClick = { routes.pushSingleTop(DemoRoute.Details) }) { Text("Open details") }
+                    ExpandableSectionBody(expanded = expanded.expanded) { Text("More") }
+                    AdaptiveSummaryCard(
+                        icon = Icons.Rounded.Home,
+                        title = "Inventory",
+                        summary = "Reusable summary",
+                        trailingText = "3",
+                    )
+                    AdaptiveClickableCard(onClick = {}) { Text("Clickable adaptive card") }
+                    AdaptiveInteractiveCardSurface(onClick = {}) { Text("Stable interactive card") }
+                    AdaptiveSectionGroup {
+                        item { Text("First section") }
+                        item { Text("Second section") }
+                    }
+                    retainedPayload.value?.let { Text(it) }
+                    AdaptiveTonalSurface(tone = AdaptiveSurfaceTone.Highest) {
+                        AdaptiveMetricChip(Icons.Rounded.Home, "Items", "3")
+                        AdaptiveIconLabelChip(Icons.Rounded.Home, "Category")
+                        AdaptiveLabelChip("Label")
+                    }
+                    StatusHeroCardMiuix(
+                        title = "Status",
+                        summary = "Consumer-provided summary",
+                        icon = Icons.Rounded.Home,
+                        containerColor = Color.DarkGray,
+                        accentColor = Color.LightGray,
+                        onClick = {},
+                        metaContent = { Text("Consumer-owned metadata") },
+                        actionContent = { Text("Consumer-owned action") },
+                    )
                 }
-                AdaptiveTonalSurface(tone = AdaptiveSurfaceTone.Highest) {
-                    AdaptiveMetricChip(Icons.Rounded.Home, "Items", "3")
-                    AdaptiveIconLabelChip(Icons.Rounded.Home, "Category")
-                    AdaptiveLabelChip("Label")
-                }
-                StatusHeroCardMiuix(
-                    title = "Status",
-                    summary = "Consumer-provided summary",
-                    icon = Icons.Rounded.Home,
-                    containerColor = Color.DarkGray,
-                    accentColor = Color.LightGray,
-                    onClick = {},
-                    metaContent = { Text("Consumer-owned metadata") },
-                    actionContent = { Text("Consumer-owned action") },
-                )
             }
-        }
-        AdaptiveDecisionDialog(
-            show = false,
-            title = "Decision",
-            message = "Choose one",
-            confirmLabel = "Yes",
-            dismissLabel = "No",
-            onConfirm = {},
-            onDismissButton = {},
-            onDismissRequest = {},
-        )
-        AdaptiveDetailsDialog(
-            show = false,
-            title = "Details",
-            summary = "Reusable details shell",
-            icon = Icons.Rounded.Home,
-            closeLabel = "Close",
-            onDismiss = {},
-        ) {
-            Text("Consumer-owned body")
+            AdaptiveDecisionDialog(
+                show = false,
+                title = "Decision",
+                message = "Choose one",
+                confirmLabel = "Yes",
+                dismissLabel = "No",
+                onConfirm = {},
+                onDismissButton = {},
+                onDismissRequest = {},
+            )
+            AdaptiveDetailsDialog(
+                show = false,
+                title = "Details",
+                summary = "Reusable details shell",
+                icon = Icons.Rounded.Home,
+                closeLabel = "Close",
+                onDismiss = {},
+            ) {
+                Text("Consumer-owned body")
+            }
         }
     }
 }

@@ -56,7 +56,7 @@ The default published version is `git rev-list --count HEAD` from the `uihelper`
 
 ### Consumer API contracts
 
-- `AdaptiveTheme` accepts the app's optional `materialColorScheme` and `themeController`. A consumer controls branding; uihelper only provides standalone defaults.
+- `AdaptiveTheme` accepts the app's optional `materialColorScheme` and `themeController`. A consumer controls branding; uihelper only provides standalone defaults. `materialCompatibilityColorSchemeFromMiuix` maps the active MIUIX palette into Material roles when a shared Material component must render inside the MIUIX skin, while `AdaptiveInteractionRuntime` installs the final skin-specific indication and overscroll locals after an app-owned theme layer.
 - `Navigator<T>` uses typed mutation methods and allows duplicate routes with `push`. Use `pushSingleTop` or `pushUnique` explicitly when appropriate. Define a serializable route hierarchy when using `rememberNavigator`; do not mutate its public `backStack` except to integrate it with a host.
 - `AdaptiveNavigationShell` defaults to first-page Back and responsive navigation rail, but callers can configure `backBehavior`, `onBackRequested`, `navigationRail`, and `swipeNavigationEnabled`. Pager/chrome synchronization is configurable through `pageSyncMode`: the default `NavigationShellPageSyncMode.SelectedPage` updates the top bar and navigation selection as soon as a destination is selected while `isCurrentPage` remains tied to the settled page; `NavigationShellPageSyncMode.VisiblePage` preserves the previous behavior in which the title, navigation highlight and `isCurrentPage` follow the page physically occupying most of the viewport during the transition. MIUIX chrome also ignores vertical nested-scroll deltas while the horizontal pager is moving, avoiding competing collapse state updates. All MIUIX tabs use one consistent, single-line native expanded-title measurement so switching between titles of different widths never changes the shared collapse range. The visible expanded heading is rendered in an independent row (one line with ellipsis), where an optional `largeTitleLeadingContent` slot reserves space only on the leading side; when paired with `leadingContent`, the compact glyph uses the same upward-fade Folme reveal as MIUIX's native compact title. The compact native title keeps its default horizontal padding and can use `compactTopBarTitle`; `materialTitleContent` can render an app-owned Material title without introducing a duplicate navigation glyph. Pages with child-owned drag/pinch regions should set `pagerGesturePolicy = NavigationShellPagerGesturePolicy.RegionAware` and apply `Modifier.then(pagerSwipeExclusion())` to those regions: gestures beginning there stay with the child, while swipes elsewhere still navigate. Each `NavigationShellItem` may also supply app-owned `leadingContent` and `trailingContent`; none of these slots assume app-specific branding.
 - `rememberExpandableSectionState(identity = ...)` accepts a stable business ID, **never localized display text**. The default is positional state; when used in reorderable lists, wrap the call in a stable Compose `key(id)` or a keyed lazy item.
@@ -115,21 +115,25 @@ These packages are the supported surface for feature and page code.
   - preferred import target for business pages
   - `WrapSafeText` for long identifiers, paths and other unbroken text in either skin
   - `rememberExpandableSectionState` and `ExpandableSectionBody` for generic saveable disclosure state and skin-specific expansion motion; callers own headers, badges, and business meaning
+  - `AdaptiveInteractiveCardSurface` for a stable native card composition whose optional click target can change without cutting off press feedback
+  - `AdaptiveSectionGroup` for Material segmented geometry versus continuous MIUIX grouping, with caller-owned section content
+  - `adaptiveInsetSurfaceColor` for the native inset-surface role without leaking MIUIX light/dark/dynamic palette details into consumers
   - `LabeledValueLayout` for responsive inline-or-stacked label/value placement without business-specific row models
 - `io.github.xiaotong6666.uihelper.common`
   - small reusable UI helpers shared across skins
 - `io.github.xiaotong6666.uihelper.model`
   - generic UI models and enums used by adaptive components
 - `io.github.xiaotong6666.uihelper.mode`
-  - UI mode runtime such as `UiMode` and `LocalUiMode`
+  - UI mode runtime such as `UiMode`, `LocalUiMode`, `AdaptiveTheme`, `AdaptiveInteractionRuntime`, and the MIUIX-to-Material compatibility color bridge
 - `io.github.xiaotong6666.uihelper.chrome`
   - shell and nested-scroll integration used by app-level containers
   - includes the public dual-skin host API for top-level navigation shells
   - public entry points should be shell-style APIs such as `AdaptiveNavigationShell`, `PageHost`, and `PageChrome`
 - `io.github.xiaotong6666.uihelper.dialog`
   - reusable loading and confirm dialog handles plus dual-skin presenters
+  - `rememberRetainedDialogPayload` for keeping caller-owned data alive only through a native dialog's exit transition
 - `io.github.xiaotong6666.uihelper.navigation3`
-  - reusable navigator helpers
+  - reusable navigator helpers and logical layout-direction-aware back-swipe direction
 - `io.github.xiaotong6666.uihelper.popup`
   - dual-skin popup and menu models used by app chrome and settings surfaces
 - `io.github.xiaotong6666.uihelper.extensions.androidapp`

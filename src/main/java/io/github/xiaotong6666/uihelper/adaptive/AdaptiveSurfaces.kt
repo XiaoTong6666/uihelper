@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
@@ -27,6 +29,23 @@ enum class AdaptiveSurfaceTone {
     Low,
     High,
     Highest,
+}
+
+@Composable
+@ReadOnlyComposable
+fun adaptiveInsetSurfaceColor(
+    materialColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+): Color = when (LocalUiMode.current) {
+    UiMode.Material -> materialColor
+
+    UiMode.Miuix -> {
+        val colors = MiuixTheme.colorScheme
+        if (MiuixTheme.isDynamicColor || colors.background.luminance() < 0.5f) {
+            colors.surfaceContainerHighest
+        } else {
+            colors.secondaryVariant
+        }
+    }
 }
 
 @Composable

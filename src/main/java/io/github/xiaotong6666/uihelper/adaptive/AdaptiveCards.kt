@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -128,7 +129,7 @@ fun AdaptiveSummaryCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 MiuixIcon(
-                    imageVector = icon,
+                    imageVector = resolveMiuixIcon(icon),
                     contentDescription = null,
                     tint = MiuixTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp),

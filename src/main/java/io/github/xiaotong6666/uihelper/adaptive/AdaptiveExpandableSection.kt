@@ -18,10 +18,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -35,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,13 +42,14 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.HorizontalDivider as MiuixDivider
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
 
 /**
  * Expandable grouped section with native MIUIX and Material containers.
@@ -74,48 +71,45 @@ fun AdaptiveExpandableSection(
         visibilityThreshold = IntSize.VisibilityThreshold,
     ),
     materialFadeSpec: FiniteAnimationSpec<Float> = tween(150),
+    miuixIcon: ImageVector? = icon,
     trailingContent: @Composable RowScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     AdaptiveContent(
         miuix = {
-            val interactionSource = remember { MutableInteractionSource() }
             Column(modifier = modifier.fillMaxWidth()) {
-                Row(
+                BasicComponent(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 46.dp)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = LocalIndication.current,
-                            role = Role.Button,
-                            onClick = onToggle,
-                        )
-                        .padding(horizontal = 16.dp, vertical = 9.dp)
                         .semantics(mergeDescendants = true) { heading() },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    MiuixIcon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MiuixTheme.colorScheme.primary,
-                    )
-                    MiuixText(
-                        text = title,
-                        modifier = Modifier.weight(1f),
-                        style = MiuixTheme.textStyles.headline1,
-                        color = MiuixTheme.colorScheme.onSurface,
-                    )
-                    trailingContent()
-                    MiuixIcon(
-                        imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                    )
-                }
+                    title = title,
+                    startAction = miuixIcon?.let { icon ->
+                        {
+                            MiuixIcon(
+                                imageVector = resolveMiuixIcon(icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MiuixTheme.colorScheme.onSurface,
+                            )
+                        }
+                    },
+                    endActions = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            trailingContent()
+                            MiuixIcon(
+                                imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                            )
+                        }
+                    },
+                    onClick = onToggle,
+                    role = Role.Button,
+                )
                 ExpandableSectionBody(
                     expanded = expanded,
                     modifier = Modifier

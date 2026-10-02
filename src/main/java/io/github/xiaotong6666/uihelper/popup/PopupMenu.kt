@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.material.materialChromeIconButtonColors
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.basic.DropdownImpl
@@ -188,7 +189,7 @@ fun PopupMenuIconButton(
                     colors = materialChromeIconButtonColors(),
                 ) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = resolveMiuixIcon(icon),
                         contentDescription = contentDescription,
                     )
                 }

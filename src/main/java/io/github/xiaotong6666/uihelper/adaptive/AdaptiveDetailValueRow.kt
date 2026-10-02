@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 
@@ -69,7 +70,7 @@ fun AdaptiveDetailValueRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     MiuixIcon(
-                        imageVector = icon,
+                        imageVector = resolveMiuixIcon(icon),
                         contentDescription = null,
                         tint = iconTint,
                         modifier = Modifier.padding(top = 2.dp).size(16.dp),

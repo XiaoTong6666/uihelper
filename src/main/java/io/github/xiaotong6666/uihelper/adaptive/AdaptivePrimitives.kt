@@ -13,10 +13,12 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -45,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
@@ -53,6 +56,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
@@ -180,7 +184,7 @@ fun AdaptiveIcon(
 ) {
     when (LocalUiMode.current) {
         UiMode.Material -> Icon(imageVector, contentDescription, modifier, tint)
-        UiMode.Miuix -> MiuixIcon(imageVector, contentDescription, modifier, tint)
+        UiMode.Miuix -> MiuixIcon(resolveMiuixIcon(imageVector), contentDescription, modifier, tint)
     }
 }
 
@@ -469,9 +473,7 @@ fun AdaptiveInfiniteProgressIndicator(
     }
 }
 
-/**
- * Native expand affordance. MIUIX swaps glyphs; Material keeps its rotating chevron.
- */
+/** Native expand affordance with skin-appropriate motion. */
 @Composable
 fun AdaptiveExpandIcon(
     expanded: Boolean,
@@ -498,11 +500,39 @@ fun AdaptiveExpandIcon(
             )
         }
 
-        UiMode.Miuix -> MiuixIcon(
-            imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
-            contentDescription = contentDescription,
-            modifier = modifier.size(miuixSize),
-            tint = miuixTint,
-        )
+        UiMode.Miuix -> {
+            val progress = animateFloatAsState(
+                targetValue = if (expanded) 1f else 0f,
+                animationSpec = tween(durationMillis = 240),
+                label = "MiuixExpandIcon",
+            )
+            val glyphBlend = ((progress.value - 0.38f) / 0.24f).coerceIn(0f, 1f)
+            val rotation = progress.value * 180f
+
+            Box(modifier = modifier.size(miuixSize)) {
+                MiuixIcon(
+                    imageVector = MiuixIcons.ExpandMore,
+                    contentDescription = if (expanded) null else contentDescription,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationZ = rotation
+                            alpha = 1f - glyphBlend
+                        },
+                    tint = miuixTint,
+                )
+                MiuixIcon(
+                    imageVector = MiuixIcons.ExpandLess,
+                    contentDescription = if (expanded) contentDescription else null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationZ = rotation
+                            alpha = glyphBlend
+                        },
+                    tint = miuixTint,
+                )
+            }
+        }
     }
 }

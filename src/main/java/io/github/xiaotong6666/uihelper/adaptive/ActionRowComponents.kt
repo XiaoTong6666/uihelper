@@ -46,6 +46,7 @@ import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import io.github.xiaotong6666.uihelper.model.AsyncActionState
 import io.github.xiaotong6666.uihelper.model.TextActionItem
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -285,7 +286,7 @@ fun AsyncActionRow(
                             ) {
                                 top.yukonga.miuix.kmp.basic.Icon(
                                     modifier = Modifier.size(20.dp),
-                                    imageVector = icon,
+                                    imageVector = resolveMiuixIcon(icon),
                                     tint = resolvedActionTint,
                                     contentDescription = label,
                                 )
@@ -383,7 +384,7 @@ fun TextActionGroup(
                             ) {
                                 top.yukonga.miuix.kmp.basic.Icon(
                                     modifier = Modifier.size(20.dp),
-                                    imageVector = actionIcon,
+                                    imageVector = resolveMiuixIcon(actionIcon),
                                     tint = if (item.enabled) resolvedActionTint else resolvedActionTint.copy(alpha = 0.35f),
                                     contentDescription = actionContentDescription,
                                 )

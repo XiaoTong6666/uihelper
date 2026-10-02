@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import androidx.compose.ui.unit.sp
 import io.github.xiaotong6666.uihelper.material.primitive.TonalCardMaterial
 import io.github.xiaotong6666.uihelper.miuix.primitive.SectionDescriptionMiuix
@@ -104,7 +105,7 @@ fun AdaptiveFloatingActionButton(
                     horizontalArrangement = Arrangement.spacedBy(if (expanded) 6.dp else 0.dp),
                 ) {
                     MiuixIcon(
-                        imageVector = icon,
+                        imageVector = resolveMiuixIcon(icon),
                         contentDescription = contentDescription,
                         modifier = Modifier.size(iconSize),
                         tint = MiuixTheme.colorScheme.onPrimary,

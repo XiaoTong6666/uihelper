@@ -57,6 +57,7 @@ import io.github.xiaotong6666.uihelper.miuix.effect.LocalMiuixBlurEnabled
 import io.github.xiaotong6666.uihelper.miuix.effect.MiuixBlurredChrome
 import io.github.xiaotong6666.uihelper.miuix.effect.miuixChromeColor
 import io.github.xiaotong6666.uihelper.miuix.effect.rememberMiuixBlurBackdrop
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import io.github.xiaotong6666.uihelper.popup.PopupMenuGroup
@@ -295,7 +296,7 @@ private fun DetailPageHostMiuix(
                     if (onBack != null) {
                         MiuixIconButton(onClick = onBack) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                                imageVector = resolveMiuixIcon(Icons.AutoMirrored.Outlined.ArrowBack),
                                 contentDescription = null,
                                 tint = MiuixTheme.colorScheme.onSurface,
                             )
@@ -313,7 +314,7 @@ private fun DetailPageHostMiuix(
                     actions.forEach { action ->
                         MiuixIconButton(onClick = action.onClick) {
                             Icon(
-                                imageVector = action.icon,
+                                imageVector = resolveMiuixIcon(action.icon),
                                 contentDescription = action.contentDescription,
                                 tint = MiuixTheme.colorScheme.onSurface,
                             )

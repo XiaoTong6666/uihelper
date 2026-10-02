@@ -47,7 +47,6 @@ fun ExpandableSectionBody(
     val miuix = LocalUiMode.current == UiMode.Miuix
     AnimatedVisibility(
         visible = expanded,
-        modifier = modifier,
         enter = if (miuix) {
             expandVertically(animationSpec = folmeSpring(damping = 1f, response = 0.32f, visibilityThreshold = IntSize.VisibilityThreshold)) +
                 fadeIn(animationSpec = folmeSpring(damping = 1f, response = 0.28f))
@@ -60,5 +59,10 @@ fun ExpandableSectionBody(
         } else {
             shrinkVertically(animationSpec = spring(visibilityThreshold = IntSize.VisibilityThreshold)) + fadeOut()
         },
-    ) { Column(content = content) }
+    ) {
+        // Keep spacing inside the animated bounds. Padding on AnimatedVisibility itself survives
+        // until the transition reaches PostExit, which causes a one-frame layout snap when the
+        // final inset is released after the content has already shrunk to zero.
+        Column(modifier = modifier, content = content)
+    }
 }

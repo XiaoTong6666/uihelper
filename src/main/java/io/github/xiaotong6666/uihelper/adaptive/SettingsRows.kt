@@ -48,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -467,7 +466,7 @@ fun NativeSettingsIconTile(
     miuixTint: Color = MaterialTheme.colorScheme.primary,
 ) {
     NativeSettingsIconTile(modifier = modifier) {
-        Icon(
+        AdaptiveIcon(
             imageVector = icon,
             contentDescription = null,
             tint = adaptiveValue(material = materialTint, miuix = miuixTint),
@@ -492,7 +491,7 @@ fun adaptiveMonochromeIconColor(
     materialColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ): Color = when (LocalUiMode.current) {
     UiMode.Material -> materialColor
-    UiMode.Miuix -> if (MiuixTheme.colorScheme.background.luminance() < 0.5f) Color.White else Color.Black
+    UiMode.Miuix -> MiuixTheme.colorScheme.onBackground
 }
 
 @Composable
@@ -512,10 +511,13 @@ fun NativeSettingsFootnote(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (icon != null) {
-            Icon(
+            AdaptiveIcon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = adaptiveValue(
+                    material = MaterialTheme.colorScheme.onSurfaceVariant,
+                    miuix = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                ),
                 modifier = Modifier.padding(top = 1.dp).size(18.dp),
             )
         }

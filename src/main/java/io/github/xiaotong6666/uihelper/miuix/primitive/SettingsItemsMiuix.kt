@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -68,8 +69,8 @@ fun SettingsToggleItemMiuix(checked: Boolean, title: String, description: String
         summary = description,
         startAction = {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
+                MiuixIcon(
+                    imageVector = resolveMiuixIcon(icon),
                     contentDescription = null,
                     modifier = Modifier.padding(end = 6.dp),
                     tint = MiuixTheme.colorScheme.onBackground,
@@ -91,7 +92,7 @@ fun SettingsInfoItemMiuix(title: String, value: String, icon: ImageVector? = nul
         ) {
             if (icon != null) {
                 Icon(
-                    imageVector = icon,
+                    imageVector = resolveMiuixIcon(icon),
                     contentDescription = null,
                     modifier = Modifier.size(22.dp),
                     tint = MiuixTheme.colorScheme.onBackground,
@@ -117,8 +118,8 @@ fun SettingsNavigationItemMiuix(
         summary = description,
         startAction = {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
+                MiuixIcon(
+                    imageVector = resolveMiuixIcon(icon),
                     contentDescription = null,
                     modifier = Modifier.padding(end = 6.dp),
                     tint = MiuixTheme.colorScheme.onBackground,
@@ -144,8 +145,8 @@ fun SettingsDropdownItemMiuix(
         items = items,
         startAction = {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
+                MiuixIcon(
+                    imageVector = resolveMiuixIcon(icon),
                     contentDescription = null,
                     modifier = Modifier.padding(end = 6.dp),
                     tint = MiuixTheme.colorScheme.onBackground,

@@ -38,9 +38,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircleOutline
-import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -57,6 +54,9 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.icon.extended.Report
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -170,11 +170,7 @@ fun HomeStatusCardMiuix(
                 ) {
                     Icon(
                         modifier = Modifier.size(110.dp),
-                        imageVector = if (healthy) {
-                            Icons.Rounded.CheckCircleOutline
-                        } else {
-                            Icons.Rounded.ErrorOutline
-                        },
+                        imageVector = if (healthy) MiuixIcons.Ok else MiuixIcons.Report,
                         tint = if (checking) {
                             Color.Transparent
                         } else if (healthy) {
@@ -240,7 +236,7 @@ fun HomeInfoCardMiuix(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = item.icon,
+                        imageVector = resolveMiuixIcon(item.icon),
                         contentDescription = item.title,
                         modifier = Modifier
                             .padding(end = 12.dp)

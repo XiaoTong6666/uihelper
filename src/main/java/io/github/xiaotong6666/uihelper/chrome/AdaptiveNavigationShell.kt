@@ -103,6 +103,7 @@ import io.github.xiaotong6666.uihelper.miuix.effect.miuixChromeColor
 import io.github.xiaotong6666.uihelper.miuix.effect.rememberMiuixBlurBackdrop
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -477,7 +478,7 @@ fun AdaptiveNavigationShell(
                                                     activeItem.action?.let { item ->
                                                         top.yukonga.miuix.kmp.basic.IconButton(onClick = item.onClick) {
                                                             Icon(
-                                                                imageVector = item.icon,
+                                                                imageVector = resolveMiuixIcon(item.icon),
                                                                 contentDescription = item.contentDescription,
                                                                 tint = MiuixTheme.colorScheme.onSurface,
                                                             )
@@ -532,7 +533,7 @@ fun AdaptiveNavigationShell(
                                                         onClick = item.onClick,
                                                     ) {
                                                         Icon(
-                                                            imageVector = item.icon,
+                                                            imageVector = resolveMiuixIcon(item.icon),
                                                             contentDescription = item.contentDescription,
                                                             tint = MiuixTheme.colorScheme.onSurface,
                                                         )
@@ -564,7 +565,7 @@ fun AdaptiveNavigationShell(
                                     MiuixFloatingNavigationBarItem(
                                         selected = activePageIndex == index,
                                         onClick = { onPageSelected(index) },
-                                        icon = item.icon,
+                                        icon = resolveMiuixIcon(item.icon),
                                         label = item.title,
                                     )
                                 }
@@ -578,7 +579,7 @@ fun AdaptiveNavigationShell(
                                         MiuixNavigationBarItem(
                                             selected = activePageIndex == index,
                                             onClick = { onPageSelected(index) },
-                                            icon = item.icon,
+                                            icon = resolveMiuixIcon(item.icon),
                                             label = item.title,
                                         )
                                     }
@@ -632,7 +633,7 @@ fun AdaptiveNavigationShell(
                                     MiuixNavigationRailItem(
                                         selected = activePageIndex == index,
                                         onClick = { onPageSelected(index) },
-                                        icon = item.icon,
+                                        icon = resolveMiuixIcon(item.icon),
                                         label = item.title,
                                     )
                                 }

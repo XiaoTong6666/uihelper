@@ -117,7 +117,7 @@ fun StatusHeroCardMiuix(
                 // follows that treatment, but keeps a little more of its lower interior
                 // visible (e.g. the dot in ErrorOutline must not be cropped).
                 Icon(
-                    imageVector = icon,
+                    imageVector = resolveMiuixIcon(icon),
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)

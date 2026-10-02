@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
@@ -175,7 +176,7 @@ private fun UpdatePromptMetadataRow(item: UpdatePromptMetadata) {
     ) {
         item.icon?.let { icon ->
             Icon(
-                imageVector = icon,
+                imageVector = resolveMiuixIcon(icon),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
                 tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,

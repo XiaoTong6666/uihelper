@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
@@ -27,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
@@ -34,10 +37,13 @@ import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -74,8 +80,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
 
-private val NativeSettingsItemInset = 16.dp
-private val NativeSettingsItemPadding = PaddingValues(horizontal = NativeSettingsItemInset, vertical = 14.dp)
+private val NativeSettingsMiuixItemInset = 16.dp
+private val NativeSettingsMiuixItemPadding =
+    PaddingValues(horizontal = NativeSettingsMiuixItemInset, vertical = 14.dp)
+private val NativeSettingsMaterialItemPadding =
+    PaddingValues(start = 24.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
 
 /**
  * Settings section with a native MIUIX title and an M3E compact section title.
@@ -110,14 +119,14 @@ fun NativeSettingsSection(
             }
 
             UiMode.Material -> Row(
-                modifier = Modifier.padding(horizontal = NativeSettingsItemInset),
+                modifier = Modifier.padding(start = 24.dp, end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 androidx.compose.material3.Text(
                     text = title,
                     modifier = Modifier.semantics { heading() },
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 badge?.let {
@@ -232,7 +241,7 @@ fun NativeSettingsItem(
             endActions = trailingContent?.let { trailing -> { trailing() } },
             onClick = onClick,
             enabled = enabled,
-            insideMargin = NativeSettingsItemPadding,
+            insideMargin = NativeSettingsMiuixItemPadding,
         ) {
             MiuixText(
                 text = headline,
@@ -277,7 +286,7 @@ fun NativeSettingsItem(
                     verticalAlignment = Alignment.CenterVertically,
                     supportingContent = materialSupporting,
                     colors = materialColors,
-                    contentPadding = NativeSettingsItemPadding,
+                    contentPadding = NativeSettingsMaterialItemPadding,
                     content = headlineContent,
                 )
             } else {
@@ -291,8 +300,206 @@ fun NativeSettingsItem(
                     verticalAlignment = Alignment.CenterVertically,
                     supportingContent = materialSupporting,
                     colors = materialColors,
-                    contentPadding = NativeSettingsItemPadding,
+                    contentPadding = NativeSettingsMaterialItemPadding,
                     content = headlineContent,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Page-level switch treatment matching Android Settings: a prominent tonal container instead of
+ * a normal segmented preference row. Use this for the primary switch of a page, not ordinary
+ * settings toggles.
+ */
+@Composable
+fun NativeSettingsMainSwitchItem(
+    checked: Boolean,
+    title: String,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> SettingsToggleItemMiuix(
+            checked = checked,
+            title = title,
+            description = description.orEmpty(),
+            icon = null,
+            onToggle = { onCheckedChange(!checked) },
+        )
+
+        UiMode.Material -> Surface(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.extraLarge)
+                .toggleable(
+                    value = checked,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                ),
+            shape = MaterialTheme.shapes.extraLarge,
+            color = if (checked) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.secondaryContainer
+            },
+            contentColor = if (checked) {
+                MaterialTheme.colorScheme.onPrimaryContainer
+            } else {
+                MaterialTheme.colorScheme.onSecondaryContainer
+            },
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    if (!description.isNullOrBlank()) {
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalContentColor.current.copy(alpha = 0.78f),
+                        )
+                    }
+                }
+                Switch(
+                    checked = checked,
+                    onCheckedChange = null,
+                    thumbContent = if (checked) {
+                        {
+                            Icon(
+                                imageVector = Icons.Rounded.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+    }
+}
+
+/**
+ * AOSP-style list preference: Material opens a radio dialog from the whole row while MIUIX keeps
+ * its native overlay dropdown treatment.
+ */
+@Composable
+fun NativeSettingsListPreference(
+    title: String,
+    description: String,
+    items: List<String>,
+    selectedIndex: Int,
+    onItemSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    materialShapes: ListItemShapes? = null,
+    materialColors: ListItemColors = NativeSettingsItemColors(),
+    materialIconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+) {
+    if (items.isEmpty()) return
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> SettingsDropdownItemMiuix(
+            title = title,
+            description = description,
+            items = items,
+            selectedIndex = selectedIndex,
+            icon = icon,
+            onItemSelected = onItemSelected,
+        )
+
+        UiMode.Material -> {
+            var dialogVisible by remember { mutableStateOf(false) }
+            val safeIndex = selectedIndex.coerceIn(0, items.lastIndex)
+            val haptics = LocalHapticFeedback.current
+
+            NativeSettingsItem(
+                headline = title,
+                modifier = modifier,
+                materialShapes = materialShapes ?: NativeSettingsItemShapes(index = 0, count = 1),
+                materialColors = materialColors,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    dialogVisible = true
+                },
+                leadingContent = icon?.let {
+                    { NativeSettingsIconTile(icon = it, materialTint = materialIconTint) }
+                },
+                supportingContent = {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = items[safeIndex],
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                },
+            )
+
+            if (dialogVisible) {
+                AlertDialog(
+                    onDismissRequest = { dialogVisible = false },
+                    title = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
+                    },
+                    text = {
+                        Column {
+                            items.forEachIndexed { index, label ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 48.dp)
+                                        .selectable(
+                                            selected = index == safeIndex,
+                                            role = Role.RadioButton,
+                                            onClick = {
+                                                dialogVisible = false
+                                                onItemSelected(index)
+                                            },
+                                        )
+                                        .padding(horizontal = 4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = index == safeIndex,
+                                        onClick = null,
+                                    )
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        TextButton(onClick = { dialogVisible = false }) {
+                            Text(text = androidx.compose.ui.res.stringResource(android.R.string.cancel))
+                        }
+                    },
                 )
             }
         }
@@ -394,7 +601,10 @@ fun NativeSettingsDropdownItem(
             val safeIndex = selectedIndex.coerceIn(0, items.lastIndex)
             Box(
                 modifier = modifier.trackPopupMenuPressPosition { position ->
-                    anchorOffset = IntOffset(position.x.roundToInt(), 0)
+                    anchorOffset = IntOffset(
+                        x = position.x.roundToInt(),
+                        y = position.y.roundToInt(),
+                    )
                 },
             ) {
                 NativeSettingsItem(
@@ -506,7 +716,10 @@ fun NativeSettingsFootnote(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NativeSettingsItemInset)
+            .padding(
+                start = adaptiveValue(material = 24.dp, miuix = NativeSettingsMiuixItemInset),
+                end = 16.dp,
+            )
             .padding(top = adaptiveValue(material = 0.dp, miuix = 6.dp)),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {

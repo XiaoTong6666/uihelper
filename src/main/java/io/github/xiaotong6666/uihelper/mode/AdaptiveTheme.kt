@@ -35,9 +35,9 @@ import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.utils.MiuixIndication
+import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
 
 private data class AdaptiveOverscrollBaseline(
-    val inherited: OverscrollFactory?,
     val platform: OverscrollFactory?,
 )
 
@@ -59,7 +59,6 @@ fun AdaptiveTheme(
     }
 
     val overscrollBaseline = AdaptiveOverscrollBaseline(
-        inherited = LocalOverscrollFactory.current,
         platform = rememberPlatformOverscrollFactory(),
     )
 
@@ -137,10 +136,8 @@ fun AdaptiveInteractionRuntime(content: @Composable () -> Unit) {
     val uiMode = LocalUiMode.current
     val materialIndication = LocalIndication.current
     val fallbackPlatformOverscrollFactory = rememberPlatformOverscrollFactory()
-    val currentOverscrollFactory = LocalOverscrollFactory.current
     val baseline = LocalAdaptiveOverscrollBaseline.current
     val platformOverscrollFactory = if (baseline != null) baseline.platform else fallbackPlatformOverscrollFactory
-    val inheritedOverscrollFactory = if (baseline != null) baseline.inherited else currentOverscrollFactory
     val indicationColor = MiuixTheme.colorScheme.onBackground
     val miuixIndication = remember(indicationColor) {
         MiuixIndication(color = indicationColor)
@@ -148,11 +145,21 @@ fun AdaptiveInteractionRuntime(content: @Composable () -> Unit) {
 
     CompositionLocalProvider(
         LocalIndication provides if (uiMode == UiMode.Miuix) miuixIndication else materialIndication,
-        LocalOverscrollFactory provides if (uiMode == UiMode.Material) {
-            platformOverscrollFactory
-        } else {
-            inheritedOverscrollFactory
-        },
+        LocalOverscrollFactory provides adaptiveOverscrollFactory(
+            uiMode = uiMode,
+            platformOverscrollFactory = platformOverscrollFactory,
+        ),
         content = content,
     )
+}
+
+internal fun adaptiveOverscrollFactory(
+    uiMode: UiMode,
+    platformOverscrollFactory: OverscrollFactory?,
+): OverscrollFactory? {
+    return if (uiMode == UiMode.Material) {
+        platformOverscrollFactory
+    } else {
+        MiuixOverscrollFactory
+    }
 }

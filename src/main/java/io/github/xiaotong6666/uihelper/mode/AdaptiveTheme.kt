@@ -156,10 +156,8 @@ fun AdaptiveInteractionRuntime(content: @Composable () -> Unit) {
 internal fun adaptiveOverscrollFactory(
     uiMode: UiMode,
     platformOverscrollFactory: OverscrollFactory?,
-): OverscrollFactory? {
-    return if (uiMode == UiMode.Material) {
-        platformOverscrollFactory
-    } else {
-        MiuixOverscrollFactory
-    }
+): OverscrollFactory? = if (uiMode == UiMode.Material) {
+    platformOverscrollFactory
+} else {
+    MiuixOverscrollFactory
 }

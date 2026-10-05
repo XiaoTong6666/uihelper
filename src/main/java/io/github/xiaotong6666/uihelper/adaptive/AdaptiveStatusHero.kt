@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,7 @@ fun AdaptiveStatusHeroCard(
     accentColor: Color,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    materialContentColor: Color? = null,
     metaContent: (@Composable ColumnScope.(contentColor: Color) -> Unit)? = null,
     actionContent: (@Composable ColumnScope.(contentColor: Color) -> Unit)? = null,
     miuixHeroIconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
@@ -94,12 +96,8 @@ fun AdaptiveStatusHeroCard(
                 StatusHeroTone.Success -> MaterialTheme.colorScheme.secondaryContainer
                 StatusHeroTone.Neutral -> MaterialTheme.colorScheme.surfaceContainerHigh
             }
-            val contentColor = when (tone) {
-                StatusHeroTone.Danger -> Color.White
-                StatusHeroTone.Warning -> MaterialTheme.colorScheme.onTertiaryContainer
-                StatusHeroTone.Success -> MaterialTheme.colorScheme.onSecondaryContainer
-                StatusHeroTone.Neutral -> MaterialTheme.colorScheme.onSurface
-            }
+            val contentColor =
+                materialContentColor ?: MaterialTheme.colorScheme.contentColorFor(containerColor)
             Surface(
                 onClick = onClick ?: {},
                 enabled = onClick != null,
@@ -136,7 +134,7 @@ fun AdaptiveStatusHeroCard(
                             Text(
                                 text = summary,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = contentColor.copy(alpha = 0.80f),
+                                color = contentColor.copy(alpha = 0.70f),
                             )
                         }
                     }

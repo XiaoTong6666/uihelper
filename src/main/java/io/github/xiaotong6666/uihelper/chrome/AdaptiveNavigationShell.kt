@@ -18,9 +18,7 @@
 
 package io.github.xiaotong6666.uihelper.chrome
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,14 +29,10 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults.flingBehavior
 import androidx.compose.foundation.pager.PagerDefaults.pageNestedScrollConnection
@@ -77,14 +71,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -109,7 +99,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
@@ -122,15 +111,12 @@ import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
-import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar as MiuixFloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem as MiuixFloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationBar as MiuixNavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem as MiuixNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationRail as MiuixNavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem as MiuixNavigationRailItem
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
-import top.yukonga.miuix.kmp.basic.TopAppBarDefaults as MiuixTopAppBarDefaults
 
 @Stable
 data class NavigationShellAction(
@@ -188,37 +174,6 @@ enum class NavigationShellPageSyncMode {
 
 /** Controls which tab, if any, handles Back. Disabled lets the parent route host handle it. */
 enum class NavigationShellBackBehavior { FirstPage, PreviousPage, Disabled }
-
-/** A stable one-line native measurement slot; app-owned expanded titles are rendered on top. */
-private const val STABLE_LARGE_TITLE_MEASURE_TEXT = "\u00A0"
-
-/** Match MIUIX's native compact-title reveal for a paired large/compact leading glyph. */
-@Composable
-private fun MiuixAnimatedCompactLeading(
-    visible: Boolean,
-    content: @Composable () -> Unit,
-) {
-    val alpha = remember { Animatable(if (visible) 1f else 0f) }
-    val translationY = remember { Animatable(if (visible) 0f else 20f) }
-
-    LaunchedEffect(visible) {
-        val spec = folmeSpring<Float>(
-            damping = 1.0f,
-            response = if (visible) 0.30f else 0.15f,
-        )
-        launch { alpha.animateTo(if (visible) 1f else 0f, spec) }
-        launch { translationY.animateTo(if (visible) 0f else 20f, spec) }
-    }
-
-    Box(
-        modifier = Modifier.graphicsLayer {
-            this.alpha = alpha.value
-            this.translationY = translationY.value
-        },
-    ) {
-        content()
-    }
-}
 
 private class NavigationShellPagerState(
     val pagerState: PagerState,
@@ -435,90 +390,30 @@ fun AdaptiveNavigationShell(
                             val defaultTopBar: ComposableContent = {
                                 if (isTopBarScrollable) {
                                     val largeLeading = activeItem.largeTitleLeadingContent
-                                    val hasLargeLeading = largeLeading != null
-                                    val compactLeadingVisible by remember(
-                                        miuixScrollBehavior,
-                                        activePageIndex,
-                                        hasLargeLeading,
-                                    ) {
-                                        derivedStateOf {
-                                            !hasLargeLeading ||
-                                                miuixScrollBehavior.state.collapsedFraction * 3f >= 1f
-                                        }
-                                    }
-                                    Box(Modifier.fillMaxWidth().wrapContentHeight().clipToBounds()) {
-                                        top.yukonga.miuix.kmp.basic.TopAppBar(
-                                            title = activeItem.compactTopBarTitle,
-                                            // The native bar measures its large title to compute heightOffsetLimit.
-                                            // All tabs must have the same one-line measure or switching from a
-                                            // wrapped title to a short one changes the shared collapse geometry.
-                                            // The actual title (and optional glyph) is drawn in the overlay below.
-                                            largeTitle = STABLE_LARGE_TITLE_MEASURE_TEXT,
-                                            color = miuixChromeColor(blurActive),
-                                            titleColor = MiuixTheme.colorScheme.onSurface,
-                                            // MIUIX applies this *on both sides* to the compact title as well.
-                                            // Reserving the expanded glyph here incorrectly ellipsizes a title
-                                            // that would fit between the navigation and action icons.
-                                            titlePadding = MiuixTopAppBarDefaults.TitlePadding,
-                                            navigationIcon = {
-                                                if (largeLeading != null) {
-                                                    MiuixAnimatedCompactLeading(
-                                                        visible = compactLeadingVisible,
-                                                    ) {
-                                                        activeItem.leadingContent?.invoke()
-                                                    }
-                                                } else {
-                                                    activeItem.leadingContent?.invoke()
-                                                }
-                                            },
-                                            actions = {
-                                                if (activeItem.trailingContent != null) {
-                                                    activeItem.trailingContent.invoke(this)
-                                                } else {
-                                                    activeItem.action?.let { item ->
-                                                        top.yukonga.miuix.kmp.basic.IconButton(onClick = item.onClick) {
-                                                            Icon(
-                                                                imageVector = resolveMiuixIcon(item.icon),
-                                                                contentDescription = item.contentDescription,
-                                                                tint = MiuixTheme.colorScheme.onSurface,
-                                                            )
-                                                        }
+                                    MiuixLargeTitleTopBar(
+                                        title = activeItem.topBarTitle,
+                                        compactTitle = activeItem.compactTopBarTitle,
+                                        color = miuixChromeColor(blurActive),
+                                        titleColor = MiuixTheme.colorScheme.onSurface,
+                                        expandedLeadingContent = largeLeading,
+                                        compactLeadingContent = activeItem.leadingContent,
+                                        actions = {
+                                            if (activeItem.trailingContent != null) {
+                                                activeItem.trailingContent.invoke(this)
+                                            } else {
+                                                activeItem.action?.let { item ->
+                                                    top.yukonga.miuix.kmp.basic.IconButton(onClick = item.onClick) {
+                                                        Icon(
+                                                            imageVector = resolveMiuixIcon(item.icon),
+                                                            contentDescription = item.contentDescription,
+                                                            tint = MiuixTheme.colorScheme.onSurface,
+                                                        )
                                                     }
                                                 }
-                                            },
-                                            scrollBehavior = miuixScrollBehavior,
-                                        )
-                                        // A single-line, asymmetrically spaced expanded title: only the
-                                        // leading glyph uses width; the right-hand text area remains available.
-                                        // Keep this as a pure overlay: matchParentSize children do not contribute
-                                        // to Box measurement, so Scaffold continues to observe the native
-                                        // TopAppBar's shrinking height and moves page content upward in lockstep.
-                                        Row(
-                                            modifier = Modifier
-                                                .matchParentSize()
-                                                .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
-                                                .padding(top = MiuixTopAppBarDefaults.CollapsedHeight)
-                                                .offset { IntOffset(0, miuixScrollBehavior.state.heightOffset.roundToInt()) }
-                                                .graphicsLayer {
-                                                    alpha = (1f - miuixScrollBehavior.state.collapsedFraction * 3f).coerceIn(0f, 1f)
-                                                }
-                                                .padding(horizontal = MiuixTopAppBarDefaults.TitlePadding),
-                                            horizontalArrangement = Arrangement.spacedBy(if (largeLeading != null) 10.dp else 0.dp),
-                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                        ) {
-                                            largeLeading?.invoke()
-                                            MiuixText(
-                                                text = activeItem.topBarTitle,
-                                                modifier = Modifier.weight(1f, fill = false),
-                                                color = MiuixTheme.colorScheme.onSurface,
-                                                fontSize = MiuixTheme.textStyles.title1.fontSize,
-                                                fontWeight = FontWeight.Normal,
-                                                maxLines = 1,
-                                                softWrap = false,
-                                                overflow = TextOverflow.Ellipsis,
-                                            )
-                                        }
-                                    }
+                                            }
+                                        },
+                                        scrollBehavior = miuixScrollBehavior,
+                                    )
                                 } else {
                                     top.yukonga.miuix.kmp.basic.SmallTopAppBar(
                                         title = activeItem.topBarTitle,

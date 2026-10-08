@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.Card
@@ -86,6 +87,7 @@ fun StatusHeroCardMiuix(
     metaContent: (@Composable ColumnScope.() -> Unit)? = null,
     actionContent: (@Composable ColumnScope.() -> Unit)? = null,
     iconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
+    metaContentEndPadding: Dp = 108.dp,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -171,12 +173,12 @@ fun StatusHeroCardMiuix(
                         )
                     }
                     if (metaContent != null) {
-                        // The status glyph owns the lower-right, while app-owned
-                        // metadata uses the full available *left* column.
+                        // Keep the historical glyph-safe inset by default. Consumers with
+                        // compact single-line metadata may opt into a smaller end inset.
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 16.dp, end = 108.dp, top = 4.dp, bottom = 4.dp),
+                                .padding(start = 16.dp, end = metaContentEndPadding, top = 4.dp, bottom = 4.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                             content = metaContent,
                         )

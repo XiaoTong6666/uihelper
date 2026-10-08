@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import io.github.xiaotong6666.uihelper.miuix.primitive.MiuixHeroIconMode
 import io.github.xiaotong6666.uihelper.miuix.primitive.StatusHeroCardMiuix
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
@@ -61,6 +62,7 @@ fun AdaptiveStatusHeroCard(
     metaContent: (@Composable ColumnScope.(contentColor: Color) -> Unit)? = null,
     actionContent: (@Composable ColumnScope.(contentColor: Color) -> Unit)? = null,
     miuixHeroIconMode: MiuixHeroIconMode = MiuixHeroIconMode.Preserve,
+    miuixMetaContentEndPadding: Dp = 108.dp,
 ) {
     when (LocalUiMode.current) {
         UiMode.Miuix -> {
@@ -86,6 +88,7 @@ fun AdaptiveStatusHeroCard(
                 metaContent = metaContent?.let { content -> { content(contentColor) } },
                 actionContent = actionContent?.let { content -> { content(contentColor) } },
                 iconMode = miuixHeroIconMode,
+                metaContentEndPadding = miuixMetaContentEndPadding,
             )
         }
 

@@ -105,7 +105,7 @@ dependencies {
     api(libs.miuix.nav)
     // Root builds use their own version catalog, not this
     // standalone project's libs. Keep this public inline dependency explicit.
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation("junit:junit:4.13.2")

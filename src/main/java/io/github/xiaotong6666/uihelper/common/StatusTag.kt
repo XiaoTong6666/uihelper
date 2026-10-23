@@ -34,6 +34,19 @@ import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
 
+/**
+ * Compatibility status-tag geometry and type scale; consumers can retain their existing
+ * appearance without changing the shapes or font measurements.
+ */
+private object StatusTagVisuals {
+    val MaterialShape = RoundedCornerShape(4.dp)
+    val MiuixShape = RoundedCornerShape(6.dp)
+    val MiuixFontSize = 9.sp
+    val MiuixFontWeight = FontWeight(750)
+    val HorizontalPadding = 4.dp
+    val VerticalPadding = 2.dp
+}
+
 @Composable
 fun StatusTag(
     label: String,
@@ -70,12 +83,15 @@ private fun MaterialStatusTag(
             .padding(end = 4.dp)
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(4.dp),
+                shape = StatusTagVisuals.MaterialShape,
             ),
     ) {
         Text(
             text = label,
-            modifier = Modifier.padding(vertical = 2.dp, horizontal = 4.dp),
+            modifier = Modifier.padding(
+                vertical = StatusTagVisuals.VerticalPadding,
+                horizontal = StatusTagVisuals.HorizontalPadding,
+            ),
             style = MaterialTheme.typography.labelSmallEmphasized,
             color = contentColor,
         )
@@ -92,15 +108,18 @@ private fun MiuixStatusTag(
     Box(
         modifier = modifier.background(
             color = backgroundColor,
-            shape = RoundedCornerShape(6.dp),
+            shape = StatusTagVisuals.MiuixShape,
         ),
     ) {
         MiuixText(
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            modifier = Modifier.padding(
+                horizontal = StatusTagVisuals.HorizontalPadding,
+                vertical = StatusTagVisuals.VerticalPadding,
+            ),
             text = label,
             color = contentColor,
-            fontSize = 9.sp,
-            fontWeight = FontWeight(750),
+            fontSize = StatusTagVisuals.MiuixFontSize,
+            fontWeight = StatusTagVisuals.MiuixFontWeight,
             maxLines = 1,
             softWrap = false,
         )

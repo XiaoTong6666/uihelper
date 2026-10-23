@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.AlertDialog
@@ -65,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsDropdownItemMiuix
+import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsNavigationItemMiuix
 import io.github.xiaotong6666.uihelper.miuix.primitive.SettingsToggleItemMiuix
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
@@ -171,11 +173,14 @@ fun NativeSettingsGroup(
 }
 
 @Composable
-fun NativeSettingsItemShapes(index: Int, count: Int): ListItemShapes {
+fun NativeSettingsItemShapes(index: Int = 0, count: Int = 1): ListItemShapes {
+    val position = LocalNativeSettingsGroupPosition.current
+    val actualIndex = position?.index ?: index
+    val actualCount = position?.count ?: count
     val shapes = MaterialTheme.shapes
-    return remember(index, count, shapes) {
+    return remember(actualIndex, actualCount, shapes) {
         val outer = shapes.large.topStart
-        fun shape(inner: CornerSize) = nativeSettingsSegmentShape(index, count, inner, outer)
+        fun shape(inner: CornerSize) = nativeSettingsSegmentShape(actualIndex, actualCount, inner, outer)
         ListItemShapes(
             shape = shape(shapes.extraSmall.topStart),
             selectedShape = shape(shapes.large.topStart),
@@ -305,6 +310,51 @@ fun NativeSettingsItem(
                 )
             }
         }
+    }
+}
+
+/**
+ * A navigation action occupying a full row in the same settings group as switches.
+ * MIUIX uses a native ArrowPreference; Material keeps the group's segmented geometry
+ * and a real clickable ListItem (never a separate floating button).
+ */
+@Composable
+fun NativeSettingsNavigationItem(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    icon: ImageVector? = null,
+    materialColors: ListItemColors = NativeSettingsItemColors(),
+) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> SettingsNavigationItemMiuix(
+            title = title,
+            description = description,
+            icon = icon,
+            onClick = onClick,
+        )
+
+        UiMode.Material -> NativeSettingsItem(
+            headline = title,
+            modifier = modifier,
+            materialShapes = NativeSettingsItemShapes(index = 0, count = 1),
+            materialColors = materialColors,
+            onClick = onClick,
+            leadingContent = icon?.let {
+                { NativeSettingsIconTile(icon = it) }
+            },
+            supportingContent = description?.let {
+                { Text(it) }
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+        )
     }
 }
 

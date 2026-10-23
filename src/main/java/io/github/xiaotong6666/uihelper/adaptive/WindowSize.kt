@@ -26,5 +26,9 @@ fun shouldShowSplitPane(): Boolean {
     val density = LocalResources.current.displayMetrics.density
     val widthDp = windowInfo.containerSize.width / density
     val heightDp = windowInfo.containerSize.height / density
-    return widthDp >= 840f || (widthDp >= 600f && heightDp / widthDp < 1.2f)
+    return shouldUseNavigationRail(widthDp, heightDp)
 }
+
+/** Maintain the configured 840dp / landscape-600dp transition independent of UI font scaling. */
+internal fun shouldUseNavigationRail(widthDp: Float, heightDp: Float): Boolean =
+    widthDp >= 840f || (widthDp >= 600f && widthDp > 0f && heightDp / widthDp < 1.2f)

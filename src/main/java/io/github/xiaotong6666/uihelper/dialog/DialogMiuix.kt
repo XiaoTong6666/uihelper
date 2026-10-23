@@ -45,6 +45,12 @@ import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
 
+/** Compatibility metrics for confirmation actions; keep spacing stable for existing consumers. */
+private object ConfirmationDialogLayout {
+    val ActionTopPadding = 12.dp
+    val ActionSpacing = 20.dp
+}
+
 @Composable
 fun LoadingDialogMiuix(showDialog: State<Boolean>, message: State<String?>) {
     val loadingMessage = message.value
@@ -99,7 +105,7 @@ fun ConfirmDialogMiuix(
                     }
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.padding(top = 12.dp),
+                        modifier = Modifier.padding(top = ConfirmationDialogLayout.ActionTopPadding),
                     ) {
                         TextButton(
                             text = visuals.dismiss ?: androidx.compose.ui.res.stringResource(android.R.string.cancel),
@@ -109,7 +115,7 @@ fun ConfirmDialogMiuix(
                             },
                             modifier = Modifier.weight(1f),
                         )
-                        Spacer(Modifier.width(20.dp))
+                        Spacer(Modifier.width(ConfirmationDialogLayout.ActionSpacing))
                         TextButton(
                             text = visuals.confirm ?: androidx.compose.ui.res.stringResource(android.R.string.ok),
                             onClick = {

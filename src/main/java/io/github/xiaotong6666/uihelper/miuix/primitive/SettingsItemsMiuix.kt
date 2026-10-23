@@ -109,7 +109,7 @@ fun SettingsInfoItemMiuix(title: String, value: String, icon: ImageVector? = nul
 @Composable
 fun SettingsNavigationItemMiuix(
     title: String,
-    description: String,
+    description: String? = null,
     icon: ImageVector? = null,
     onClick: () -> Unit,
 ) {

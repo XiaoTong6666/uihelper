@@ -144,8 +144,8 @@ fun HomeStatusCardMiuix(
 
         healthy -> when {
             MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.secondaryContainer
-            isSystemInDarkTheme() -> Color(0xFF1A3825)
-            else -> Color(0xFFDFFAE4)
+            isSystemInDarkTheme() -> MiuixStatusColorTokens.HealthySurfaceDark
+            else -> MiuixStatusColorTokens.HealthySurfaceLight
         }
 
         else -> MiuixTheme.colorScheme.errorContainer
@@ -189,7 +189,7 @@ fun HomeStatusCardMiuix(
                             if (MiuixTheme.isDynamicColor) {
                                 MiuixTheme.colorScheme.primary.copy(alpha = 0.8f)
                             } else {
-                                Color(0xFF36D167)
+                                MiuixStatusColorTokens.HealthyWatermark
                             }
                         } else {
                             MiuixTheme.colorScheme.error.copy(alpha = 0.8f)

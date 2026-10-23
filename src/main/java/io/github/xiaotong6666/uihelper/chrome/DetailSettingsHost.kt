@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import io.github.xiaotong6666.uihelper.adaptive.UiContentSpacing
 import io.github.xiaotong6666.uihelper.material.materialAccentIconButtonColors
 import io.github.xiaotong6666.uihelper.material.materialChromeIconButtonColors
 import io.github.xiaotong6666.uihelper.material.scaffold.ExpressiveScaffold
@@ -57,6 +58,7 @@ import io.github.xiaotong6666.uihelper.miuix.effect.LocalMiuixBlurEnabled
 import io.github.xiaotong6666.uihelper.miuix.effect.MiuixBlurredChrome
 import io.github.xiaotong6666.uihelper.miuix.effect.miuixChromeColor
 import io.github.xiaotong6666.uihelper.miuix.effect.rememberMiuixBlurBackdrop
+import io.github.xiaotong6666.uihelper.miuix.primitive.miuixDetailHorizontalInsets
 import io.github.xiaotong6666.uihelper.miuix.primitive.resolveMiuixIcon
 import io.github.xiaotong6666.uihelper.mode.LocalUiMode
 import io.github.xiaotong6666.uihelper.mode.UiMode
@@ -365,16 +367,17 @@ private fun DetailPageBodyMiuix(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
+            .miuixDetailHorizontalInsets()
             .scrollEndHaptic()
             .overScrollVertical()
             .then(scrollModifier),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
-            top = contentPadding.calculateTopPadding() + 12.dp,
-            bottom = contentPadding.calculateBottomPadding() + 20.dp,
+            top = contentPadding.calculateTopPadding() + UiContentSpacing.PageTop,
+            bottom = contentPadding.calculateBottomPadding() + UiContentSpacing.DetailBottom,
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(UiContentSpacing.DetailItemGap),
         overscrollEffect = null,
     ) {
         item {

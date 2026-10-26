@@ -7,7 +7,7 @@ activity-compose = "1.13.0"
 androidx-core = "1.19.1"
 navigationevent = "1.2.0"
 miuix = "0.9.4"
-commonmark = "0.30.1"
+commonmark = "0.31.0"
 appiconloader = "1.5.0"
 
 [libraries]

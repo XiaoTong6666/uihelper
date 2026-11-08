@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">ナビゲーションを展開</string>
+    <string name="uihelper_collapse_navigation">ナビゲーションを折りたたむ</string>
+    <string name="uihelper_pull_refresh">引っ張って更新</string>
+    <string name="uihelper_release_refresh">離して更新</string>
+    <string name="uihelper_refreshing">更新中</string>
+    <string name="uihelper_refresh_complete">更新完了</string>
+</resources>

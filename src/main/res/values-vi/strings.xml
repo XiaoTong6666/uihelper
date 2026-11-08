@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">Mở rộng điều hướng</string>
+    <string name="uihelper_collapse_navigation">Thu gọn điều hướng</string>
+    <string name="uihelper_pull_refresh">Kéo xuống để làm mới</string>
+    <string name="uihelper_release_refresh">Thả để làm mới</string>
+    <string name="uihelper_refreshing">Đang làm mới</string>
+    <string name="uihelper_refresh_complete">Làm mới hoàn tất</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">탐색 메뉴 펼치기</string>
+    <string name="uihelper_collapse_navigation">탐색 메뉴 접기</string>
+    <string name="uihelper_pull_refresh">당겨서 새로고침</string>
+    <string name="uihelper_release_refresh">놓아서 새로고침</string>
+    <string name="uihelper_refreshing">새로고침 중</string>
+    <string name="uihelper_refresh_complete">새로고침 완료</string>
+</resources>

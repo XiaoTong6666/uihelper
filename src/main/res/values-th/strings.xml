@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">ขยายแถบนำทาง</string>
+    <string name="uihelper_collapse_navigation">ยุบแถบนำทาง</string>
+    <string name="uihelper_pull_refresh">ดึงลงเพื่อรีเฟรช</string>
+    <string name="uihelper_release_refresh">ปล่อยเพื่อรีเฟรช</string>
+    <string name="uihelper_refreshing">กำลังรีเฟรช</string>
+    <string name="uihelper_refresh_complete">รีเฟรชเสร็จสิ้น</string>
+</resources>

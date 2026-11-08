@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">Розгорнути навігацію</string>
+    <string name="uihelper_collapse_navigation">Згорнути навігацію</string>
+    <string name="uihelper_pull_refresh">Потягніть, щоб оновити</string>
+    <string name="uihelper_release_refresh">Відпустіть, щоб оновити</string>
+    <string name="uihelper_refreshing">Оновлення</string>
+    <string name="uihelper_refresh_complete">Оновлено</string>
+</resources>

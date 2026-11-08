@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">展開導航</string>
+    <string name="uihelper_collapse_navigation">收起導航</string>
+    <string name="uihelper_pull_refresh">下拉重新整理</string>
+    <string name="uihelper_release_refresh">放開以重新整理</string>
+    <string name="uihelper_refreshing">正在重新整理</string>
+    <string name="uihelper_refresh_complete">重新整理完成</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uihelper_expand_navigation">توسيع التنقل</string>
+    <string name="uihelper_collapse_navigation">طي التنقل</string>
+    <string name="uihelper_pull_refresh">اسحب للتحديث</string>
+    <string name="uihelper_release_refresh">أفلت للتحديث</string>
+    <string name="uihelper_refreshing">جارٍ التحديث</string>
+    <string name="uihelper_refresh_complete">اكتمل التحديث</string>
+</resources>
